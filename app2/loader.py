@@ -36,12 +36,17 @@ class ContractLoader(bulkload.Loader):
         # setup a unique key for the entity. composed of agency_name + reference_number + contract_date
         # reference number can be empty, so add contract_date
         key_name = entity['agency_name']+entity['reference_number']+(entity['contract_date'] or 'foo')
-        contract_exists = Contract.get_by_key_name(key_name)
+        contract = Contract.get_by_key_name(key_name)
+        contract_exists = contract is not None
         # if not contract_exists:
         #     logging.debug('found a new contract with reference number:'+entity['reference_number'])
-        newent = datastore.Entity('Contract', name=key_name)
-        newent.update(entity)
-        ent = search.SearchableEntity(newent)
+        newent = entity
+        if contract_exists:
+            pass
+        else:
+            newent = datastore.Entity('Contract', name=key_name)
+            newent.update(entity)
+            newent = search.SearchableEntity(newent)
         #XXX setup a parent for the entity?
         
         def increment_aggregates(key, count, value):
@@ -63,7 +68,7 @@ class ContractLoader(bulkload.Loader):
             
         time.sleep(0.5)
         
-        return ent
+        return newent
 
 if __name__ == '__main__':
     bulkload.main(ContractLoader())

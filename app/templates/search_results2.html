@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+{% if dev %}
+<!--Script and CSS includes for YUI dependencies on this page-->
+<link rel="stylesheet" type="text/css" href="/static/yui/build/datatable/assets/skins/sam/datatable.css" />
+<link rel="stylesheet" type="text/css" href="/static/yui/build/button/assets/skins/sam/button.css" />
+<script type="text/javascript" src="/static/yui/build/yahoo-dom-event/yahoo-dom-event.js"></script>
+<script type="text/javascript" src="/static/yui/build/connection/connection-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/json/json-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/element/element-beta-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/datasource/datasource-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/datatable/datatable-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/button/button-min.js"></script>
+<script type="text/javascript" src="/static/yui/build/utilities/utilities.js"></script>
+
+{% else %}
+<!-- Combo-handled YUI CSS files: -->
+<link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/combo?2.6.0/build/paginator/assets/skins/sam/paginator.css&2.6.0/build/datatable/assets/skins/sam/datatable.css">
+<!-- Combo-handled YUI JS files: -->
+<script type="text/javascript" src="http://yui.yahooapis.com/combo?2.6.0/build/yahoo-dom-event/yahoo-dom-event.js&2.6.0/build/connection/connection-min.js&2.6.0/build/datasource/datasource-min.js&2.6.0/build/element/element-beta-min.js&2.6.0/build/paginator/paginator-min.js&2.6.0/build/datatable/datatable-min.js&2.6.0/build/json/json-min.js"></script>
+
+{% endif %}
+	
+	<script type="text/javascript">
+	YAHOO.util.Event.addListener("search_btn", "click", function() {
+	    YAHOO.disclosed = new function() {
+					this.OFFSET_INTERVAL = 50;
+	        this.formatUrl = function(elCell, oRecord, oColumn, sData) {
+	            elCell.innerHTML = "<a href='" + oRecord.getData("uri") + "' target='_blank'>" + sData + "</a>";
+	        };
+					this.updateCaption = function () {
+						var caption = ''
+						if ( this.count > 0 ) {
+							var contractSum = YAHOO.util.Number.format(this.contractSum, {
+							                prefix:"$",
+							                decimalPlaces:2,
+							                decimalSeparator:".",
+							                thousandsSeparator:","
+							            });
+							caption = "Found " + this.count + " contracts. Total value is " + contractSum;
+						}
+						else {	
+						}
+						this.caption.innerHTML = caption;
+					};
+					this.onDataReturnAppendRows = function (oRequest,oResponse,oPayload) {
+						for ( var i = 0; i < oResponse.results.length; i ++ ) {
+							var record = oResponse.results[i];
+							this.contractSum += parseFloat(record.contract_value);
+							this.count++;
+						}
+						this.updateCaption()
+						this.myDataTable.onDataReturnAppendRows(oRequest,oResponse,oPayload);
+						if (oResponse.results.length == this.OFFSET_INTERVAL) {
+							this.myDataSource.sendRequest("offset="+this.offset+"&keyword="+this.keyword,
+			                callback1);
+							this.offset += this.OFFSET_INTERVAL;
+						}
+					};
+					var dateRE = /^(\d{4})-(\d{2})-(\d{2})/;
+					YAHOO.util.DataSource.parseDate = function (v) {
+					    return typeof v === 'string' && dateRE.test(v) ?
+					        new Date(RegExp.$1,(RegExp.$2|0)-1,RegExp.$3) : null;
+					};
+					
+					this.keyword = YAHOO.util.Dom.get('keyword').value;
+	        var myColumnDefs = [
+	            {key:"agency_name", label:"Agency", sortable:true, formatter:this.formatUrl},
+	            {key:"vendor_name", label: "Vendor", sortable:true},
+	            {key:"contract_value", label: "Value", formatter:YAHOO.widget.DataTable.formatCurrency, sortable:true},
+	            {key:"contract_date", label:"Date", formatter:YAHOO.widget.DataTable.formatDate, sortable:true}
+	        ];
+
+	        this.myDataSource = new YAHOO.util.DataSource("/rpc?");
+	        this.myDataSource.responseType = YAHOO.util.DataSource.TYPE_JSON;
+	        this.myDataSource.connXhrMode = "queueRequests";
+	        this.myDataSource.responseSchema = {
+	            resultsList: "resultset",
+	            fields: ["agency_name","vendor_name",
+											{key:"contract_value",parser:YAHOO.util.DataSource.parseNumber},
+											{key:"contract_date",parser:YAHOO.util.DataSource.parseDate},
+											"uri"]
+	        };
+
+					this.caption = YAHOO.util.Dom.get('search_results_caption');
+					this.count = 0;
+					this.contractSum = 0;
+	        this.myDataTable = new YAHOO.widget.DataTable("search_results", myColumnDefs,
+	                this.myDataSource, {initialLoad:false, scrollable:true, height:"30em"});
+
+					this.updateCaption();
+				
+	        var callback1 = {
+	            success : this.onDataReturnAppendRows,
+	            failure : this.onDataReturnAppendRows,
+	            scope : this
+	        };
+					this.offset = 0;
+	        this.myDataSource.sendRequest("offset="+this.offset+"&keyword="+this.keyword,
+	                callback1);
+					this.offset += this.OFFSET_INTERVAL;
+					
+					// update the ad
+					var adbar = YAHOO.util.Dom.get('adbar');
+					var transaction = YAHOO.util.Connect.asyncRequest('GET', '/adbar', {
+						success: function(o) {
+							adbar.innerHTML = o.responseText;
+						}
+					}, null);
+	    };
+	});
+	
+	</script>
+{% if keyword %}
+	<title>Disclosed: Search results for {{keyword|escape}}</title>
+{% else %}
+	<title>Disclosed: Canadian Government Accountability Tools</title>
+{% endif %}
+
+<style type="text/css">
+body, input, select {
+	font-family:"Lucida Grande",Calibri,Arial,sans-serif;
+	font-size:10pt;
+}
+h2, h3 {
+  text-align: center;
+} 
+div#keyword_wrapper {
+{% if keyword %}
+  padding-top: 10px;
+  padding-right: 7px;
+  text-align: left;
+  float: left;
+{% else %}
+  text-align: center;
+  clear: both;
+{% endif %}
+}
+div#search_btn_wrapper {
+{% if keyword %}
+	padding-top: 10px;
+{% else %}
+	text-align: center;
+{% endif %}
+}
+div#main{
+	width:600px;
+	height: 40em;
+	margin:0px auto;
+	text-align:left;
+	padding:15px;
+}
+div#search_results{
+	float: left;
+	width: 70%;
+}
+div.clear {
+	clear:both;
+}
+div#logo_big {
+	padding-bottom: 5px;
+}
+div#logo_small {
+	float: left;
+	padding-right: 7px;
+}
+#adbar {
+	float: left;
+	width: 120px;
+	padding-left: 10px;
+}
+.record {
+	/*background-color: #87CEEB;*/
+	padding: 5px;
+	border-top: thin dotted silver;
+	#width: 90%;
+}
+.contract_value {
+	font-weight: bold;
+}
+#footer {
+	font-style: italic;
+	margin-top: 25px;
+	padding-top: 5px;
+	border-top: dotted silver;
+	width: 95%;
+	clear: both;
+}
+a {
+	text-decoration: none;
+}
+a.ext-link .icon {
+	background:transparent url(/images/extlink.gif) no-repeat scroll left center;
+	padding-left:16px;
+}
+.ext-link-text {
+	font-size: 9pt;
+}
+</style>
+</head>
+
+<body>
+
+
+
+<h3>
+	<div id="logo_big"><img src="/images/logo_big.gif" width="273" height="100"/></div>
+	Search for past contracts<!--, grants and travel expenses --> across Canadian government agencies
+</h3>
+
+<form method="get" action="/" id="search">
+<div id="keyword_wrapper"><input id="keyword" type="text" name="keyword" size=40 value="{{keyword|escape}}"/></div>
+<div id="search_btn_wrapper"><input id="search_btn" type="button" value="Search"/></div>
+<div class="clear"></div>
+</form>
+
+<br />
+<div id="main" class="yui-skin-sam">
+	
+<div id="search_results_caption"></div><br/>
+<div id="search_results"></div> 
+
+<div id="adbar">
+
+</div>
+
+</div>
+<br/>
+
+{% if keyword %}
+<div id="footer">
+	Disclosed.ca keeps track of <span id="total_records">hundreds of thousands of</span> contracts since 2004.
+</div>
+{% endif %}
+
+{% if not dev %}
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-967727-3");
+pageTracker._trackPageview();
+</script>
+{% endif %}
+
+</body>
+</html>

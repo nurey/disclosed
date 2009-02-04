@@ -1,0 +1,118 @@
+Government of Canada Contracts Repository
+aka. Canadian Government Public Tenders Search
+aka. GOAT: Government Open Accountability Tools
+
+mechanize for python:
+http://wwwsearch.sourceforge.net/mechanize/
+
+html parsing for python:
+beautiful soup http://www.crummy.com/software/BeautifulSoup/
+
+List of all agencies:
+http://www.tbs-sct.gc.ca/pd-dp/gr-rg/index_e.asp
+
+Proactive Disclosure
+http://www.ec.gc.ca/default.asp?lang=En&n=390AF41B-1
+
+Similar Websites:
+Welcome to MERX - Bienvenue à MERX
+
+-----
+
+- Setup a proxy server to cache all the pages or use WWW::Mechanize::Cached
+- non-commercial usage seems to be ok: http://www.tbs-sct.gc.ca/tbs-sct/cmn/notices-avis-eng.asp#non
+    - XXX: add footnote about the source of the data
+
+
+ROADMAP:
+- vendor name is empty for some contracts... http://www.admfincs.forces.gc.ca/pd/contracts/contract_e.asp?q=1&y=2004&id=3515
+- #DONE# website: total.txt gets cached
+- website: craps out when searching "Health Canada"
+	Traceback (most recent call last):
+	  File "/base/python_lib/versions/1/google/appengine/ext/webapp/__init__.py", line 499, in __call__
+	    handler.get(*groups)
+	  File "/base/data/home/apps/govtenders/1.17/search.py", line 31, in get
+	    results = query.Get(50);
+	  File "/base/python_lib/versions/1/google/appengine/api/datastore.py", line 934, in Get
+	    return self._Run(limit, offset)._Next(limit)
+	  File "/base/python_lib/versions/1/google/appengine/api/datastore.py", line 878, in _Run
+	    _ToDatastoreError(err)
+	  File "/base/python_lib/versions/1/google/appengine/api/datastore.py", line 1607, in _ToDatastoreError
+	    raise errors[err.application_error](err.error_detail)
+	BadRequestError: The built-in indices are not efficient enough for this query and your data. Please add a composite index for this query.
+	
+- website: bug with entity encoding --> http://disclosed.ca/?keyword=+de+culture+populair&submit=Search
+- #DONE# scraper: validate csv for correct number of columns
+- #DONE# scraper: bulkloader can't handle high ascii chars like french accents. workaround?
+- loader: don't index URI property
+- website: implement paged search results
+- parse vendor names and ability to associate urls to vendor name
+- website: pie charts of agency spending
+- website: let ppl post comments on any record
+- website: aggregate results; running total; user could select multiple entries and it would display a total on the side
+- #DONE# footnote should also have the number of records indexed
+- website: user accounts
+- scraper: scrape provincial and municipal contracts. eg. https://www.raqsb.mto.gov.on.ca/login/raqs.nsf/English/Text/viewContractHistory?OpenForm
+- website: tag cloud of agencies
+- website: "post to twitter" link for each contract
+- website: rankings like "biggest gov supplier"
+
+ERROR    2008-06-15 09:18:57,609 bulkload_client.py] An error occurred while importing: Received code 502: Bad Gateway
+
+
+<html><head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8">
+<title>502 Server Error</title>
+<style><!--
+body {font-family: arial,sans-serif}
+div.nav {margin-top: 1ex}
+div.nav A {font-size: 10pt; font-family: arial,sans-serif}
+span.nav {font-size: 10pt; font-family: arial,sans-serif; font-weight: bold}
+div.nav A,span.big {font-size: 12pt; color: #0000cc}
+div.nav A {font-size: 10pt; color: black}
+A.l:link {color: #6f6f6f}
+A.u:link {color: green}
+//--></style>
+<script><!--
+var rc=502;
+//-->
+</script>
+</head>
+<body text=#000000 bgcolor=#ffffff>
+<table border=0 cellpadding=2 cellspacing=0 width=100%><tr><td rowspan=3 width=1% nowrap>
+<b><font face=times color=#0039b6 size=10>G</font><font face=times color=#c41200 size=10>o</font><font face=times color=#f3c518 size=10>o</font><font face=times color=#0039b6 size=10>g</font><font face=times color=#30a72f size=10>l</font><font face=times color=#c41200 size=10>e</font>&nbsp;&nbsp;</b>
+<td>&nbsp;</td></tr>
+<tr><td bgcolor=#3366cc><font face=arial,sans-serif color=#ffffff><b>Error</b></td></tr>
+<tr><td>&nbsp;</td></tr></table>
+<blockquote>
+<H1>Server Error</H1>
+The server encountered a temporary error and could not complete your request.<p>Please try again in 30 seconds.
+<BR><BR>Please see Google's Terms of Service posted at http://www.google.com/terms_of_service.html
+<BR><BR><P>We have encountered an error while processing your request. If you would like to provide us with information about this error, please <A HREF="http://www.google.com/support/bin/request.py?contact_type=user&hl=en">report</A> your problem. In your email, please send us the <b>entire</b> code displayed below.  Please also send us any information you may know about how you are performing your Google searches-- for example, "I'm using the Opera browser on Linux to do searches from home.  My Internet access is through a dial-up account I have with the FooCorp ISP." or "I'm using the Konqueror browser on Linux to search from my job at myFoo.com.  My machine's IP address is 10.20.30.40, but all of myFoo's web traffic goes through some kind of proxy server whose IP address is 10.11.12.13."  (If you don't know any information like this, that's OK.  But this kind of information can help us track down problems, so please tell us what you can.)</P><P>We will use all this information to diagnose the problem, and we'll hopefully have you back up and searching with Google again quickly!</P>
+<P>Please note that although we read all the email we receive, we are not always able to send a personal response to each and every email.  So don't despair if you don't hear back from us!</P>
+<P>Also note that if you do not send us the <b>entire</b> code below, <i>we will not be able to help you</i>.</P><P>Best wishes,<BR>The Google Team</BR></P><BLOCKQUOTE>/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/<BR>
+hCMW26ogLGVlmUm42TKrFAcdY_1JQrnzQw4uibNcPdcRFxfai<BR>
+aiythxWzsYnPjqjGebWIL_B5tKo_zbGMyofOIcxVCWaRIQave<BR>
+crDtaGAwjMDnTWxMOxasl2cEOlsEqrx4Bw2PcZaK9AWXwrHLO<BR>
+1ggZ7cJPxFNfeg6O-hb9lkmqSrHLCQEkOTbgyohTEjU_I46og<BR>
+5SYHq25i8X1U_mJZ3asMW3lacHOPHPvVNcsipLhXAWWRtaj6q<BR>
+jiXq4-Hmu5zroIVgAUkthDeEckCWy1UayIthC9a8oGt2CoriC<BR>
+Jz9WdjYZD9KlRdPQAx967H1w8ccQXN0551p-mkoD3d36E3PoZ<BR>
+A9GEOe_B9do2PBPZ9QQSqYI_--tgHaFuQVowK3LW0QCvMBofD<BR>
+y1-yJ7oLMNDMg49uY3-gY9nUs0xii3qnactC4bSjVO6Nsz38B<BR>
+CM_foN-u7VVYbOE_0vclTroeEqAC-ipgPrFH-NDW-luQzKyiH<BR>
+X_VhHdGfzix6ZcOYhqIpqMnKTdvVFzWwaXhRh4zK6wNMLee5K<BR>
+x48xK8IrxRCNFrT8jx9arI_hiEkmFZ78DsEPd2EPag_fRgHIP<BR>
+eHp1eG7rKmViivSVKsPtXWsMl4NVjPRN7KYykY1kd7ruHJqYI<BR>
+_GeFx5AtMU9PhOlPJj1vKgFUuOOH_SjVPKPuQBmFGZ44CNaqs<BR>
+wWhec_mMVWh-Ef7dx7MGQ3VRH-PvjXlvxLkdc5DfiyLk_Hp8g<BR>
+S82wBXxY2PeASXcTZnP6BkO1VYhbgjx-V5BQ4lWWlKnqTDSLk<BR>
+FYeKz62DUrdG5zQUPtwF-esZa8lKILMH4zwzVxU2_ajqm2RWK<BR>
+t-Dmr04GTEULPrNgKAIhSpRjcl2kwjvBn4V8QbeSWAArNOUBe<BR>
+12uHBFrPSCntqkqOP8s5uIL2XOnIa0<BR>
++/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+/+<BR></BLOCKQUOTE>
+
+<p>
+</blockquote>
+<table width=100% cellpadding=0 cellspacing=0><tr><td bgcolor=#3366cc><img alt="" width=1 height=4></td></tr></table>
+</body></html>

@@ -1,0 +1,6 @@
+{% load goat_filters %}
+<ul>
+{% for agency in agencies %}
+<li value="{{ agency.contract_value }}"><a title="{{ agency.contract_value|currency }}" href="/search/agency_name/{{ agency.name }}">{{ agency.name }}</a></li>
+{% endfor %}
+</ul>

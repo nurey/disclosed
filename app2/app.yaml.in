@@ -1,0 +1,19 @@
+application: govtenders-aep
+version: 1
+runtime: python
+api_version: 1
+
+handlers:
+- url: /load
+  script: loader.py
+  login: admin
+  
+- url: /delete
+  script: delete.py
+  login: admin
+  
+- url: /static
+  static_dir: static
+
+- url: .*
+  script: common/appenginepatch/main.py

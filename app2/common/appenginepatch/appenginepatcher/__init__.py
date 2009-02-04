@@ -1,0 +1,16 @@
+from google.appengine.api import apiproxy_stub_map
+import os, sys
+
+have_appserver = bool(apiproxy_stub_map.apiproxy.GetStub('datastore_v3'))
+
+try:
+    from google.appengine.tools import dev_appserver
+    from aecmd import PROJECT_DIR
+    appconfig, unused = dev_appserver.LoadAppConfig(PROJECT_DIR, {})
+    appid = appconfig.application
+except ImportError:
+    appid = None
+
+on_production_server = not (
+        os.environ.get('SERVER_SOFTWARE', '').lower().startswith('devel') or
+        sys.argv[0].endswith('manage.py'))

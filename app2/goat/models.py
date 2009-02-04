@@ -20,7 +20,7 @@ class Contract(search.SearchableModel):
             contract_value = re.sub('[^\d\.]', '', contract_value)
             contract_value = re.sub('\.$', '', contract_value)
             #contract_value = contract_value.replace('$','').replace(',','')
-            contract_value = float(contract_value)
+            contract_value = float(contract_value or 0)
         super(Contract,self).__init__(parent, key, _app, contract_value = contract_value, **kwds)
   
 class Agency(db.Model):

@@ -1,11 +1,11 @@
 # DO NOT MODIFY THIS FILE. USE app.yaml.in
 api_version: 1
-application: govtenders-aep
+application: govtenders
 handlers:
 - {login: admin, script: loader.py, url: /load}
 - {login: admin, script: delete.py, url: /delete}
 - {static_dir: static, url: /static}
 - {script: common/appenginepatch/main.py, url: .*}
 runtime: python
-version: 112
+version: 120
 

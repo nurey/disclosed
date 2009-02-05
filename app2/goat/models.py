@@ -12,6 +12,7 @@ class Contract(search.SearchableModel):
     delivery_date = db.StringProperty()
     contract_value = db.FloatProperty()
     comments = db.TextProperty()
+    import_date = db.DateTimeProperty(auto_now_add=True)
     # in version 106, we changed contract_value from StringProperty to FloatProperty.
     # let's migrate, thanks to http://kupuguy.blogspot.com/2008/05/migrating-models.html
     def __init__(self, parent=None, key=None, _app=None, contract_value=None, **kwds):

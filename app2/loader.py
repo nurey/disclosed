@@ -29,9 +29,14 @@ class ContractLoader(bulkload.Loader):
         # remove old entity
         old_key_name = entity['agency_name']+entity['reference_number']
         old_contract = Contract.get_by_key_name(old_key_name)
+        
+        def delete_contract(key):
+            obj = db.get(key)
+            obj.delete()
+            
         if old_contract:
-            logging.debug('deleting old contract with key_name '+old_key_name)
-            old_contract.delete()
+            logging.debug('attempting to delete old contract with key_name '+old_key_name)
+            db.run_in_transaction(delete_contract, old_contract.key())
             
         # setup a unique key for the entity. composed of agency_name + reference_number + contract_date
         # reference number can be empty, so add contract_date
@@ -40,13 +45,10 @@ class ContractLoader(bulkload.Loader):
         contract_exists = contract is not None
         # if not contract_exists:
         #     logging.debug('found a new contract with reference number:'+entity['reference_number'])
-        newent = entity
-        if contract_exists:
-            pass
-        else:
-            newent = datastore.Entity('Contract', name=key_name)
-            newent.update(entity)
-            newent = search.SearchableEntity(newent)
+
+        newent = datastore.Entity('Contract', name=key_name)
+        newent.update(entity)
+        newent = search.SearchableEntity(newent)
         #XXX setup a parent for the entity?
         
         def increment_aggregates(key, count, value):

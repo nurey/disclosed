@@ -27,17 +27,17 @@ class ContractLoader(bulkload.Loader):
   
     def HandleEntity(self, entity):
         # remove old entity
-        old_key_name = entity['agency_name']+entity['reference_number']
-        old_contract = Contract.get_by_key_name(old_key_name)
+        # old_key_name = entity['agency_name']+entity['reference_number']
+        # old_contract = Contract.get_by_key_name(old_key_name)
         
-        def delete_contract(key):
-            obj = db.get(key)
-            obj.delete()
-            
-        if old_contract:
-            logging.debug('attempting to delete old contract with key_name '+old_key_name)
-            db.run_in_transaction(delete_contract, old_contract.key())
-            
+        # def delete_contract(key):
+        #     obj = db.get(key)
+        #     obj.delete()
+        # 
+        # if old_contract:
+        #     logging.debug('attempting to delete old contract with key_name '+old_key_name)
+        #     db.run_in_transaction(delete_contract, old_contract.key())
+         
         # setup a unique key for the entity. composed of agency_name + reference_number + contract_date
         # reference number can be empty, so add contract_date
         key_name = entity['agency_name']+entity['reference_number']+(entity['contract_date'] or 'foo')
@@ -46,10 +46,14 @@ class ContractLoader(bulkload.Loader):
         # if not contract_exists:
         #     logging.debug('found a new contract with reference number:'+entity['reference_number'])
 
-        newent = datastore.Entity('Contract', name=key_name)
-        newent.update(entity)
-        newent = search.SearchableEntity(newent)
-        #XXX setup a parent for the entity?
+        newent = entity
+        if contract_exists:
+            return None # don't update the existing entity
+        else:
+            newent = datastore.Entity('Contract', name=key_name)
+            newent.update(entity)
+            newent = search.SearchableEntity(newent)
+            #XXX setup a parent for the entity?
         
         def increment_aggregates(key, count, value):
             obj = db.get(key)

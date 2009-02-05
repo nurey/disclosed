@@ -1,0 +1,13 @@
+-quota increase for loading scenario
+    -jeverling said something about remote_api, coming up in the next
+    few days. also coming in the next release: revamped bulk upload
+    tool: it will generally have a better way to manage the upload options and
+    flow, better recovery
+
+-need a function to delete all data for an app
+    -not gonna happen any time soon
+
+-is datastore.Entity a private API?
+    -no, it's safe to use
+
+-getting error "can't update the same entity twice in a transaction or operation". advice for fixing?

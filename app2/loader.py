@@ -50,6 +50,8 @@ class ContractLoader(bulkload.Loader):
         if contract_exists:
             return None # don't update the existing entity
         else:
+            # still get the error: can't update the same entity twice in a transaction or operation.
+            # this happens when encountering a duplicate key in the csv
             newent = datastore.Entity('Contract', name=key_name)
             newent.update(entity)
             newent = search.SearchableEntity(newent)
@@ -72,7 +74,7 @@ class ContractLoader(bulkload.Loader):
             vendor = Vendor.get_or_insert(vendor_name, name=vendor_name)
             db.run_in_transaction(increment_aggregates, vendor.key(), 1, entity['contract_value'])
             
-        time.sleep(0.5)
+        #time.sleep(0.5)
         
         return newent
 

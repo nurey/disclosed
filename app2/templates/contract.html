@@ -1,0 +1,19 @@
+{% load goat_filters %}
+
+Government Agency: <a href="{% url search_by_prop "agency_name",result.agency_name %}">{{ result.agency_name|safe }}</a><br />
+Vendor Name: <a href="{% url search_by_prop "vendor_name",result.vendor_name %}">{{ result.vendor_name|safe }}</a><br />
+Description of work: {{ result.description|safe }}<br />
+Value: <span class="contract_value">{{ result.contract_value|currency }}</span><br />
+Date: {{ result.contract_date }} 
+{% if result.delivery_date %}
+Delivery: {{ result.delivery_date|safe }} 
+{% endif %}
+{% if result.contract_period %}
+Period: {{ result.contract_period|safe }}
+{% endif %}
+{% if result.comments %}
+<br />
+Comments: {{ result.comments|safe }}
+{% endif %}
+<br />
+<a href="{{ result.uri|safe }}" class="ext-link"><span class="icon"></span><span class="ext-link-text">View contract on the agency website</span</a><br />

@@ -10,4 +10,5 @@ urlpatterns = patterns(
     (r'^adbar$', 'adbar'),
     (r'^tagcloud$', 'tagcloud'),
     url(r'^search/(.+?)/(.*)$', 'search_by_prop', name='search_by_prop'),
+    url(r'^contract/(.+?)/$', 'view_contract'),
     )

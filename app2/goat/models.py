@@ -34,19 +34,3 @@ class Vendor(db.Model):
 	contract_count = db.IntegerProperty(default=0)
 	contract_value = db.FloatProperty(default=0.00)
 	
-
-'''
-the perl equivalent from Agency.pm
-
-# fix contract value
-if ( $contract->{"contract value"} ) {
-    $contract->{"contract value"} =~ s/\$//g;
-    $contract->{"contract value"} =~ s/\s//g;
-    $contract->{"contract value"} =~ s/\*//g;
-    $contract->{"contract value"} =~ s/,(\d{2})$/.$1/; # 16133,98 => 16133.98
-    $contract->{"contract value"} =~ s/,//g;
-    # some values are:  $24,969.00(txincl.)
-    $contract->{"contract value"} =~ s/[^\d\.]//g;
-    $contract->{"contract value"} =~ s/\.$//g;
-}
-'''

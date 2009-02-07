@@ -7,6 +7,8 @@ register = template.Library()
  
 @register.filter()
 def currency(value):
+    if not value:
+        return value
     try:
         value = locale.currency(value, grouping=True)
     except:

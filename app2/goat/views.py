@@ -147,3 +147,11 @@ def _process_query(request, query):
     template_params['total_cnt'] = total_cnt
 	
     return template_params
+    
+def view_contract(request, key_name):
+    logging.debug("key_name="+key_name)
+    result = Contract.get_by_key_name(key_name)
+    template_params = {}
+    template_params['result'] = result
+    return render_to_response('contract.html', template_params)
+	

@@ -1,4 +1,5 @@
 import os, math
+import urllib
 
 # AppEngine imports
 #from google.appengine.api import mail
@@ -194,5 +195,6 @@ def chart(request, model, fetch_limit):
         values_str = ','.join([str((math.ceil(value/value_max*100))) for value in values])
 	
         gchart_url = "http://chart.apis.google.com/chart?chtt=%s&chs=700x350&chd=t:%s&cht=p&chl=%s" % (chart_title, values_str, names_str)
+        gchart_url = urllib.urlencode(gchart_url)
         memcache.add(memcache_key, gchart_url, 3600) #expiration: 1 hour
     return HttpResponsePermanentRedirect(gchart_url)

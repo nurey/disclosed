@@ -8,7 +8,7 @@ handlers:
   script: loader.py
   login: admin
   
-- url: /delete
+- url: /delete.*
   script: delete.py
   login: admin
   

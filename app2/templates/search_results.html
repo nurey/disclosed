@@ -18,7 +18,7 @@
 	$(document).ready(function() {
 		$('div#keyword input').focus();
 		$('#tagcloud').load('/tagcloud', {}, function() { 
-			$('#tagcloud ul').tagcloud({type:"list",sizemin:8})
+			$('#tagcloud ul').tagcloud({type:"list",sizemin:10})
 		});
 	});
 	</script>
@@ -188,6 +188,8 @@ a.ext-link .icon {
 	<img src="/chart/Agency/6" /><br/>
 	<img src="/chart/Vendor/12" />
 </div>
+
+<br/>
 
 <div id="tagcloud"></div>
 	

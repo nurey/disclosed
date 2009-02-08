@@ -34,7 +34,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
     'ragendja.middleware.LoginRequiredMiddleware',
+#    'ragendja.auth.middleware.GoogleAuthenticationMiddleware',
 )
+
+#AUTH_USER_MODULE = 'ragendja.auth.google_models'
+#AUTH_ADMIN_MODULE = 'ragendja.auth.google_admin'
 
 ROOT_URLCONF = 'urls'
 

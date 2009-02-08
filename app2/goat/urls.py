@@ -9,7 +9,7 @@ urlpatterns = patterns(
     (r'^rpc$', 'rpc_search_by_keyword'),
     (r'^adbar$', 'adbar'),
     (r'^tagcloud$', 'tagcloud'),
-    (r'^chart/(.+?)/(.*)$', 'chart'),
+    (r'^chart/(.*)/(.*)', 'chart'),
     url(r'^search/(.+?)/(.*)$', 'search_by_prop', name='search_by_prop'),
     url(r'^contract/(.+?)/$', 'view_contract'),
     )

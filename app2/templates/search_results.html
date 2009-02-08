@@ -83,9 +83,14 @@ div#logo_small {
 	font-weight: bold;
 }
 #tagcloud {
-	background-color: #FFFFEE;
-  border: 1px solid #F8E78C;
+
+	background-color: white;
+    border: 1px solid #F8E78C;
 	clear: both;
+	padding: 2px;
+}
+#charts {
+	text-align: center;
 }
 #footer {
 	font-style: italic;
@@ -179,9 +184,16 @@ a.ext-link .icon {
 
 {% endif  %}
 
+<div id="charts">
+	<img src="/chart/Agency/6" /><br/>
+	<img src="/chart/Vendor/12" />
+</div>
+
 <div id="tagcloud"></div>
 	
 <div id="footer">
+	<a href="http://code.google.com/appengine/whyappengine.html"><img src="http://code.google.com/appengine/images/appengine-silver-120x30.gif" 
+	alt="Powered by Google App Engine" border="0" align="right" style="padding-bottom: 60px;" /></a>
 	Disclosed.ca keeps track of {{ contract_count }} contracts available since 2004 under the <a href="http://www.tbs-sct.gc.ca/pd-dp/index-eng.asp">Government of Canada Proactive Disclosure</a>.<br/>
 	Although every reasonable effort is made to present current and accurate information, Disclosed.ca makes no guarantees of any kind.<br/>
 	Disclosed.ca is a production of <a href="http://www.nurey.com/">Nurey Networks Inc.</a> &copy; 2008-2009. <br/>

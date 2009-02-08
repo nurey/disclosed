@@ -194,6 +194,6 @@ def chart(request, model, fetch_limit):
         value_max = max(values)
         values_str = ','.join([str((math.ceil(value/value_max*100))) for value in values])
 	
-        gchart_url = "http://chart.apis.google.com/chart?chtt=%s&chs=700x350&chd=t:%s&cht=p&chl=%s" % (chart_title, urllib.quote(values_str), urllib.quote(names_str))
+        gchart_url = "http://chart.apis.google.com/chart?chtt=%s&chs=800x250&chd=t:%s&cht=p&chl=%s" % (chart_title, urllib.quote(values_str), urllib.quote(names_str))
         memcache.add(memcache_key, gchart_url, 3600) #expiration: 1 hour
     return HttpResponsePermanentRedirect(gchart_url)

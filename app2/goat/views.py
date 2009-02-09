@@ -1,5 +1,4 @@
-import os, math
-import urllib
+import os, math, re, urllib
 
 # AppEngine imports
 #from google.appengine.api import mail
@@ -19,19 +18,22 @@ from django.shortcuts import render_to_response
 import django.template
 from django.utils import simplejson
 
-import traceback
-import logging
+import traceback, logging
 logging.getLogger().setLevel(logging.DEBUG)
 
 from models import Contract, Agency, Vendor
 import utils
 
-#XXX memcache this
 def contract_count():
-	agencies = Agency.all().fetch(200)
-	count = 0
-	for agency in agencies:
-	    count += agency.contract_count
+    count = memcache.get("contract_count_total")
+    if count is None:
+    	agencies = Agency.all().fetch(200)
+    	count = 0
+    	for agency in agencies:
+    	    count += agency.contract_count
+        
+        memcache.add("contract_count_total", count, 7200) #expiration: 2 hour
+        
 	return count
 
 def global_template_params():
@@ -61,6 +63,10 @@ def search_by_prop(request, prop=None, keyword=None):
 def search_by_keyword(request):
 	keyword = request.GET.get('keyword') or ''
 	
+	# we can only do full text search on two words for now
+	if len( re.split("\s*", keyword) ) > 2:
+	    keyword = " ".join( re.split("\s*", keyword)[:2] )
+
 	template_params = {
 	    'keyword': keyword,
 	    'dev': os.environ["SERVER_SOFTWARE"].find('Development') != -1
@@ -157,7 +163,6 @@ def _process_query(request, query):
     return template_params
 
 def view_contract(request, key_name):
-    logging.debug("key_name="+key_name)
     result = Contract.get_by_key_name(key_name)
     template_params = {}
     template_params['result'] = result
@@ -186,6 +191,7 @@ def chart(request, model, fetch_limit):
         for entity in entities:
     	    #names.append(agency.name + ": " + utils.currency(int(agency.contract_value)))
     	    entity_name = entity.name.replace('vendor ', '') #XXX remove this line when we fix Vendor.name
+    	    entity_name = entity_name.replace('&amp;', '&') # vendor name has &amp;
     	    names.append(entity_name)
     	    values.append(entity.contract_value)
     

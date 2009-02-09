@@ -24,16 +24,25 @@ logging.getLogger().setLevel(logging.DEBUG)
 from models import Contract, Agency, Vendor
 import utils
 
+def memoize(key, time=3600):
+    """Decorator to memoize functions using memcache."""
+    def decorator(fxn):
+        def wrapper(*args, **kwargs):
+            data = memcache.get(key)
+            if data is not None:
+                return data
+            data = fxn(*args, **kwargs)
+            memcache.set(key, data, time)
+            return data
+        return wrapper
+    return decorator# if not settings.DEBUG else fxn
+
+@memoize('contract_count_total')
 def contract_count():
-    count = memcache.get("contract_count_total")
-    if count is None:
-    	agencies = Agency.all().fetch(200)
-    	count = 0
-    	for agency in agencies:
-    	    count += agency.contract_count
-        
-        memcache.add("contract_count_total", count, 7200) #expiration: 2 hour
-        
+	agencies = Agency.all().fetch(200)
+	count = 0
+	for agency in agencies:
+	    count += agency.contract_count
 	return count
 
 def global_template_params():
@@ -154,7 +163,6 @@ def _process_query(request, query):
     if len(results) == PAGESIZE + 1:
         next = results[-1].contract_date
     results = results[:PAGESIZE]
-    template_params['contract_count'] = contract_count()
     template_params['next'] = next
     template_params['results'] = results
     template_params['total_value'] = total_value
@@ -168,6 +176,7 @@ def view_contract(request, key_name):
     template_params['result'] = result
     return render_to_response('contract.html', template_params)
 
+#XXX use parameterized memoize. see comments in http://appengine-cookbook.appspot.com/recipe/decorator-to-getset-from-the-memcache-automatically/
 def chart(request, model, fetch_limit):
     memcache_key = "chart:%s:%s" % (model, fetch_limit)
     gchart_url = memcache.get(memcache_key)

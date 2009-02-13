@@ -42,20 +42,24 @@ ROADMAP:
 	BadRequestError: The built-in indices are not efficient enough for this query and your data. Please add a composite index for this query.
 	
 - website: bug with entity encoding --> http://disclosed.ca/?keyword=+de+culture+populair&submit=Search
-- #DONE# scraper: validate csv for correct number of columns
-- #DONE# scraper: bulkloader can't handle high ascii chars like french accents. workaround?
 - loader: don't index URI property
 - website: implement paged search results
 - parse vendor names and ability to associate urls to vendor name
 - website: pie charts of agency spending
 - website: let ppl post comments on any record
 - website: aggregate results; running total; user could select multiple entries and it would display a total on the side
-- #DONE# footnote should also have the number of records indexed
 - website: user accounts
 - scraper: scrape provincial and municipal contracts. eg. https://www.raqsb.mto.gov.on.ca/login/raqs.nsf/English/Text/viewContractHistory?OpenForm
-- website: tag cloud of agencies
 - website: "post to twitter" link for each contract
-- website: rankings like "biggest gov supplier"
+- website: rankings like "Top 100 gov vendors"
+- website: contact info for government agency
+- website: links to crazy contracts
+- website: "About" page
+- website: make it so easy to understand that any schoolgirl can learn it quickly and write a paper about it
+- #DONE# scraper: validate csv for correct number of columns
+- #DONE# scraper: bulkloader can't handle high ascii chars like french accents. workaround?
+- #DONE# footnote should also have the number of records indexed
+- #DONE# website: tag cloud of agencies
 
 ERROR    2008-06-15 09:18:57,609 bulkload_client.py] An error occurred while importing: Received code 502: Bad Gateway
 

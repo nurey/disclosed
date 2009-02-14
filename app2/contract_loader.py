@@ -9,7 +9,7 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 from goat.models import Contract, Agency, Vendor
 	
-class ContractLoader(bulkload.Loader):
+class ContractLoader(Loader):
     def __init__(self):
         bulkload.Loader.__init__(self, 'Contract',
                          [
@@ -78,5 +78,5 @@ class ContractLoader(bulkload.Loader):
         
         return newent
 
-if __name__ == '__main__':
-    bulkload.main(ContractLoader())
+#if __name__ == '__main__':
+#    bulkload.main(ContractLoader())

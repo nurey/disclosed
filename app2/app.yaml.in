@@ -4,8 +4,8 @@ runtime: python
 api_version: 1
 
 handlers:
-- url: /load
-  script: loader.py
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
   login: admin
   
 - url: /delete.*

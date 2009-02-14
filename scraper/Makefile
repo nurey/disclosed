@@ -5,3 +5,6 @@ count:
 
 clean-empty:
 	find csv/ -empty -name *.csv -exec rm {} \;
+
+uniq:
+	for i in csv/*.csv; do uniq "$${i}" $${i}.uniq; done

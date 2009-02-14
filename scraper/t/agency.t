@@ -52,6 +52,26 @@ while ( my $agency = $agency_iter->() ) {
     parse_contract($agency);
 }
 
+
+# test for _fixup_contract_url
+{
+    is(Agency->_fixup_contract_url('http://foobar.com/foo.html?bar=baz&amp;'), 
+        'http://foobar.com/foo.html?bar=baz&', 
+        '_fixup_contract_url for &amp;');
+    is(Agency->_fixup_contract_url("http://foobar.com/\nfoo.html"), 
+        'http://foobar.com/foo.html', 
+        '_fixup_contract_url for newline');    
+    is(Agency->_fixup_contract_url('http://foobar.com/foo\bar.html'), 
+        'http://foobar.com/foo/bar.html', 
+        '_fixup_contract_url for backslash');
+}
+
+# test parse_contract_date 
+{
+    is(Agency->parse_contract_date('2008-12-07'), '2008-12-07', 'parse_contract_date');
+    is(Agency->parse_contract_date('12/7/2008'), '2008-12-07', 'parse_contract_date');
+}
+
 {
 my $cbsa = Agency->new_from_yml_alias('cbsa');
 my $cbsa_contracts = slurp "$ENV{GOAT_HOME}/scraper/t/input/cbsa_contracts_2006-2007_q4.html";
@@ -78,21 +98,3 @@ is @$fja_contract_urls, 11, 'verify number of contracts';
 }
 
 
-# test for _fixup_contract_url
-{
-    is(Agency->_fixup_contract_url('http://foobar.com/foo.html?bar=baz&amp;'), 
-        'http://foobar.com/foo.html?bar=baz&', 
-        '_fixup_contract_url for &amp;');
-    is(Agency->_fixup_contract_url("http://foobar.com/\nfoo.html"), 
-        'http://foobar.com/foo.html', 
-        '_fixup_contract_url for newline');    
-    is(Agency->_fixup_contract_url('http://foobar.com/foo\bar.html'), 
-        'http://foobar.com/foo/bar.html', 
-        '_fixup_contract_url for backslash');
-}
-
-# test parse_contract_date 
-{
-    is(Agency->parse_contract_date('2008-12-07'), '2008-12-07', 'parse_contract_date');
-    is(Agency->parse_contract_date('12/7/2008'), '2008-12-07', 'parse_contract_date');
-}

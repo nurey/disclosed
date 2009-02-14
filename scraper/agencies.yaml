@@ -349,12 +349,9 @@ Citizenship and Immigration Canada:
   
 Office of the Commissioner for Federal Judicial Affairs:
   alias: fja
-  start_url: http://www.fja.gc.ca/fja-cmf/pd-dp/contracts-contrats/reports-rapports-eng.html
+  start_url: http://www.fja.gc.ca/pd-dp/contracts-contrats/reports-rapports-eng.html
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Office of the Commissioner of Official Languages:
   alias: ocol
@@ -405,9 +402,6 @@ Courts Administration Service:
   sample_url: http://cas-ncr-nter03.cas-satj.gc.ca/portal/page/portal/proactive_eng/contracts-contrats_eng/contracts-contrats2_eng?ReferenceNo=CON-07-094
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 5
-    count: 0
 
 Elections Canada:
   alias: elections
@@ -428,12 +422,9 @@ Department of Finance Canada:
     
 Financial Consumer Agency of Canada:
   alias: fcac
-  start_url: http://www.fcac-acfc.gc.ca/eng/Disclosure/Contracts_e.asp?view=v1
+  start_url: http://www.fcac-acfc.gc.ca/eng/Disclosure/Contracts-eng.asp?view=v1
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Financial Transactions and Reports Analysis Centre of Canada:
   alias: fintrac
@@ -613,23 +604,17 @@ National Energy Board:
     - delivery date
     - value
     - comments
-  entity_table_constraints:
-    depth: 0
-    count: 0
  
 #XXX: not much contracts, deal with it later   
 #National Farm Products Council:
   
 National Film Board:
   alias: nfb
-  start_url: http://www.nfb.ca/about/publications/divulgation-proactive.php
-  quarter_links_url_regex: !!perl/regexp (?-xism:disclosure/trimestre.php)
+  start_url: http://www3.nfb.ca/about/publications/divulgation-proactive.php
+  #quarter_links_url_regex: !!perl/regexp (?-xism:disclosure/trimestre.php)
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
 #XXX: delivery date is rolled into contract period. in other words there's no delivery date
 National Parole Board:
@@ -655,9 +640,6 @@ National Research Council Canada:
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 6
 
 #XXX: broken html
 National Round Table on the Environment and the Economy:
@@ -679,13 +661,17 @@ Natural Resources Canada:
   
 Natural Sciences and Engineering Research Council of Canada:
   alias: nserc
-  start_url: http://www.nserc.gc.ca/about/expense/disclosure_10k/quarterly_e.htm
+  #start_url: http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/contracts-contrats_eng.asp
+  contracts_links:
+    - { text: 2008 Q2, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=3" }
+    - { text: 2008 Q1, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=2" }
+    - { text: 2007 Q4, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=1" }
+    - { text: 2007 Q3, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2007&PID=4" }
+    - { text: 2007 Q2, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2007&PID=3" }
+    - { text: 2007 Q1, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2007&PID=2" }
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 2
     
 Patented Medicine Prices Review Board:
   alias: pmprb
@@ -798,9 +784,9 @@ Public Service Staffing Tribunal:
 #XXX: problem with the list of contracts. entity_link_column is outside the parsed columns
 Public Works and Government Services Canada:
   alias: pwgsc
-  start_url: http://www.tpsgc-pwgsc.gc.ca/cgi-bin/contracts/cl.pl?Language=E&SCR=Q&Sort=0
+  start_url: http://www.tpsgc-pwgsc.gc.ca/cgi-bin/proactive/cl.pl?lang=eng&SCR=Q&Sort=0
   headers: *headers001
-  entity_url_key_re: !!perl/regexp (?-xism:(Language=E;SCR=D;Sort=0;PF=.+?;LN=)) 
+  #entity_url_key_re: !!perl/regexp (?-xism:(Language=E;SCR=D;Sort=0;PF=.+?;LN=)) 
   entity_keys: *entity_keys001
     
 #RCMP External Review Committee:

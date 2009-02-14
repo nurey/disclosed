@@ -88,6 +88,7 @@ sub new {
     $self->{agency_name} = $args->{agency_name};
     
     $self->{debug} = $args->{debug};
+
     bless $self, $class;
     return $self;
 }
@@ -148,7 +149,7 @@ sub new_from_yml_alias {
 sub get_iter {
     my ($class) = @_;
     my $config = LoadFile(AGENCIES_YML);
-    my @agency_names = keys %$config;
+    my @agency_names = sort keys %$config; # sort for consistency
     return sub {
         my $agency_name = shift @agency_names or return;
         my $agency_config = $config->{$agency_name};
@@ -595,6 +596,10 @@ sub parse_contract {
     $contract->{'contract date'} = $self->parse_contract_date($contract->{'contract date'});
     
     #XXX refactor into subclasses?
+
+	#XXX nserc uses 'vendor name(s)'
+	$contract->{'vendor name'} ||= delete $contract->{'vendor name(s)'};
+
     # XXX fixup for some contracts of National Parole Board
     if ( exists $contract->{'contrat period'} ) {
         $logger->warn("fixing 'contrat period'");
@@ -611,14 +616,7 @@ sub parse_contract {
     
     # fix contract value
     if ( $contract->{"contract value"} ) {
-        $contract->{"contract value"} =~ s/\$//g;
-        $contract->{"contract value"} =~ s/\s//g;
-        $contract->{"contract value"} =~ s/\*//g;
-        $contract->{"contract value"} =~ s/,(\d{2})$/.$1/; # 16133,98 => 16133.98
-        $contract->{"contract value"} =~ s/,//g;
-        # some values are:  $24,969.00(txincl.)
-        $contract->{"contract value"} =~ s/[^\d\.]//g;
-        $contract->{"contract value"} =~ s/\.$//g;
+		$contract->{"contract value"} = $self->fix_contract_value($contract->{"contract value"});
     }
     
     # extraneous properties (not explicitly in the contract): agency name, uri
@@ -632,7 +630,49 @@ sub parse_contract_date {
     my ($self, $dt) = @_;
     return $dt unless $dt;
     
-    return DateTimeX::Easy->new($dt)->ymd();
+	my $ymd = $dt;
+	eval {
+		my $parsed_dt = DateTimeX::Easy->new($dt);
+		$ymd = $parsed_dt->ymd();
+	};
+	return $ymd;
+}
+
+sub fix_contract_value {
+# thanks indy@indigostar.com
+	my ($self, $value) = @_;
+
+	$value =~ s/\s//g;
+
+	my ($c) = $value =~ /([0-9\.,]+)/;      # this gets any sequence of digits, periods, and commas
+
+	my @p = $c =~ /([,\.])/g;           # get a list of puncuation characters (, or .)
+
+	if (@p == 1 && @p[0] eq '.') {
+	  # string has just one period, assume it is a decimal seperator
+	}
+	elsif (@p == 1 &&  @p[0] eq ',') {
+	  # string has just one comma, assume it is a decimal seperator, replace with period
+	  $c =~ s/,/./;
+	}
+	elsif (@p > 1  &&  @p[@p-1] ne @p[0] && @p[@p-1] eq '.') {
+	  # case 1, 3, 4
+	  $c =~ s/,//g;
+	}
+	elsif (@p > 1 &&  @p[@p-1] ne @p[0] && @p[@p-1] eq ',') {
+	  # case 2
+	  $c =~ s/\.//g;
+	  $c =~ s/,/./;
+	}
+	else {
+	  # no puncutation or multiple punctuation characters all the same
+	  # case 5 or 6
+	  $c =~ s/\.//g;
+
+	  $c =~ s/,//g;
+	}
+
+	return $c;
 }
 
 sub fix_contract_period {
@@ -666,7 +706,7 @@ sub _fixup_contract_link {
 
 	my $url;
 	eval {
-		$url = $link->url_abs();
+		$url = $link->url();
 	};
 	if ( $@ ) {
 		cluck $@,  "\n";
@@ -682,7 +722,7 @@ sub _fixup_contract_url {
     my $self = shift;
     my $url = shift;
 
-    $url =~ s/[\s\n\r]//g;
+    $url =~ s/[\t\s\n\r]//g;
     $url =~ s/&amp;/&/g;
     $url =~ s{\\}{/}g; # fixup for National Parole Board
 

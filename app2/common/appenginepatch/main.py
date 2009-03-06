@@ -5,8 +5,8 @@ import os, sys
 current_dir = os.path.abspath(os.path.dirname(__file__))
 sys.path = [current_dir] + sys.path
 
-from aecmd import setup_project
-setup_project()
+import aecmd
+aecmd.setup_project()
 
 from appenginepatcher.patch import patch_all, setup_logging
 patch_all()
@@ -16,7 +16,7 @@ from google.appengine.ext.webapp import util
 from django.conf import settings
 
 def real_main():
-    setup_project()
+    os.environ.update(aecmd.env_ext)
     setup_logging()
 
     # Create a Django application for WSGI.
@@ -26,10 +26,15 @@ def real_main():
     util.run_wsgi_app(application)
 
 def profile_main():
-    setup_project()
-    setup_logging()
+    import logging, cProfile, pstats, random, StringIO
+    only_forced_profile = getattr(settings, 'ONLY_FORCED_PROFILE', False)
+    profile_percentage = getattr(settings, 'PROFILE_PERCENTAGE', None)
+    if (only_forced_profile and
+                'profile=forced' not in os.environ.get('QUERY_STRING')) or \
+            (not only_forced_profile and profile_percentage and
+                float(profile_percentage) / 100.0 <= random.random()):
+        return real_main()
 
-    import logging, cProfile, pstats, StringIO
     prof = cProfile.Profile()
     prof = prof.runctx('real_main()', globals(), locals())
     stream = StringIO.StringIO()

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from django.db.models import signals
 from django.http import Http404
+from django.utils import simplejson
 from google.appengine.ext import db
 from ragendja.pyutils import getattr_by_path
 from random import choice
@@ -17,22 +19,37 @@ def get_filtered(data, *filters):
         data.filter(*filter)
     return data
 
-def get_object_or_404(model, *filters_or_key, **kwargs):
+def get_object(model, *filters_or_key, **kwargs):
     if kwargs.get('key_name'):
-        item = model.get_by_key_name(kwargs.get('key_name'))
+        item = model.get_by_key_name(kwargs.get('key_name'),
+            parent=kwargs.get('parent'))
     elif kwargs.get('id'):
-        item = model.get_by_id(kwargs.get('id'))
+        item = model.get_by_id(kwargs.get('id'),
+            parent=kwargs.get('parent'))
     elif len(filters_or_key) > 1:
         item = get_filtered(model.all(), *filters_or_key).get()
     else:
-        item = model.get(filters_or_key[0])
+        error = None
+        if isinstance(filters_or_key[0], (tuple, list)):
+            error = [None for index in range(len(filters_or_key[0]))]
+        try:
+            item = model.get(filters_or_key[0])
+        except (db.BadKeyError, db.KindError):
+            return error
+    return item
+
+def get_object_or_404(model, *filters_or_key, **kwargs):
+    item = get_object(model, *filters_or_key, **kwargs)
     if not item:
         raise Http404('Object does not exist!')
     return item
 
-def get_list_or_404(model, filters):
-    data = get_filtered(model.all(), *filters)
-    if not data.get():
+def get_object_list(model, *filters):
+    return get_filtered(model.all(), *filters)
+
+def get_list_or_404(model, *filters):
+    data = get_object_list(model, *filters)
+    if not data.count(1):
         raise Http404('No objects found!')
     return data
 
@@ -50,6 +67,9 @@ def transaction(func):
     """Decorator that always runs the given function in a transaction."""
     def _transaction(*args, **kwargs):
         return db.run_in_transaction(func, *args, **kwargs)
+    # In case you need to run it without a transaction you can call
+    # <func>.non_transactional(...)
+    _transaction.non_transactional = func
     return _transaction
 
 @transaction
@@ -65,18 +85,20 @@ def db_add(model, key_name, parent=None, **kwargs):
         return new_entity
     return None
 
-def db_create(model, parent=None, key_name_format=u'%s', **kwargs):
+def db_create(model, parent=None, key_name_format=u'%s',
+        non_transactional=False, **kwargs):
     """
     Creates a new model instance with a random key_name and puts it into the
     datastore.
     """
+    func = non_transactional and db_add.non_transactional or db_add
     charset = ascii_letters + digits
     while True:
         # The key_name is 16 chars long. Make sure that the first char doesn't
         # begin with a digit.
         key_name = key_name_format % (choice(ascii_letters) +
             ''.join([choice(charset) for i in range(15)]))
-        result = db_add(model, key_name, parent=parent, **kwargs)
+        result = func(model, key_name, parent=parent, **kwargs)
         if result:
             return result
 
@@ -85,8 +107,6 @@ def prefetch_references(object_list, references):
     Dereferences the given (Key)ReferenceProperty fields of a list of objects
     in as few get() calls as possible.
     """
-    # TODO: There is no safe way to work with the cache of a ReferenceProperty,
-    # so we don't yet support this.
     if object_list and references:
         if not isinstance(references, (list, tuple)):
             references = (references,)
@@ -110,10 +130,13 @@ def prefetch_references(object_list, references):
                         continue
                     key = getattr(item, property.target_name)
                     if property.use_key_name and key:
-                        key = str(db.Key.from_path(target_model.kind(), key))
+                        key = db.Key.from_path(target_model.kind(), key)
                 else:
-                    key = str(property.get_value_for_datastore(item))
+                    if ReferenceProperty.is_resolved(property, item):
+                        continue
+                    key = property.get_value_for_datastore(item)
                 if key:
+                    key = str(key)
                     prefetch[key] = prefetch.get(key, ()) + ((item, name),)
         for target_model, prefetch in targets.values():
             prefetched_items = target_model.get(prefetch.keys())
@@ -130,6 +153,7 @@ def prefetch_references(object_list, references):
                     setattr(item, reference, prefetched)
     return object_list
 
+# Deprecated due to uglyness! :)
 class KeyReferenceProperty(object):
     """
     Creates a cached accessor for a model referenced by a string property
@@ -172,8 +196,15 @@ class KeyReferenceProperty(object):
                         for destination, source in myself.integrate.items():
                             integrate_value = None
                             if kwargs[my_name]:
-                                integrate_value = getattr_by_path(
-                                    kwargs[my_name], source)
+                                try:
+                                    property = getattr(self.__class__, source)
+                                except:
+                                    property = None
+                                if property and isinstance(property, db.ReferenceProperty):
+                                    integrate_value = property.get_value_for_datastore(self)
+                                else:
+                                    integrate_value = getattr_by_path(
+                                        kwargs[my_name], source)
                             kwargs[destination] = integrate_value
                     old_init(self, *args, **kwargs)
                 model_class.__init__ = __init__
@@ -217,7 +248,50 @@ class KeyReferenceProperty(object):
         for destination, source in self.integrate.items():
             integrate_value = None
             if value:
-                integrate_value = getattr_by_path(value, source)
+                try:
+                    property = getattr(value.__class__, source)
+                except:
+                    property = None
+                if property and isinstance(property, db.ReferenceProperty):
+                    integrate_value = property.get_value_for_datastore(value)
+                else:
+                    integrate_value = getattr_by_path(value, source)
+            setattr(instance, destination, integrate_value)
+
+# Don't use this, yet. It's not part of the official API!
+class ReferenceProperty(db.ReferenceProperty):
+    def __init__(self, reference_class, integrate={}, **kwargs):
+        self.integrate = integrate
+        super(ReferenceProperty, self).__init__(reference_class, **kwargs)
+
+    @classmethod
+    def is_resolved(cls, property, instance):
+        try:
+            if not hasattr(instance, property.__id_attr_name()) or \
+                    not getattr(instance, property.__id_attr_name()):
+                return True
+            return bool(getattr(instance, property.__resolved_attr_name()))
+        except:
+            import logging
+            logging.exception('ReferenceProperty implementation changed! '
+                              'Update ragendja.dbutils.ReferenceProperty.'
+                              'is_resolved! Exception was:')
+        return False
+
+    def __set__(self, instance, value):
+        super(ReferenceProperty, self).__set__(instance, value)
+
+        for destination, source in self.integrate.items():
+            integrate_value = None
+            if value:
+                try:
+                    property = getattr(value.__class__, source)
+                except:
+                    property = None
+                if property and isinstance(property, db.ReferenceProperty):
+                    integrate_value = property.get_value_for_datastore(value)
+                else:
+                    integrate_value = getattr_by_path(value, source)
             setattr(instance, destination, integrate_value)
 
 def to_json_data(model_instance, property_list):
@@ -232,10 +306,303 @@ def to_json_data(model_instance, property_list):
     will be added, instead.
     """
     if hasattr(model_instance, '__iter__'):
-        return [to_json_data(item) for item in model_instance]
+        return [to_json_data(item, property_list) for item in model_instance]
     json_data = {}
     for property in property_list:
+        property_instance = None
+        try:
+            property_instance = getattr(model_instance.__class__,
+                property.split('.', 1)[0])
+        except:
+            pass
+        key_access = property[len(property.split('.', 1)[0]):]
+        if isinstance(property_instance, db.ReferenceProperty) and \
+                key_access in ('.key', '.key.name'):
+            key = property_instance.get_value_for_datastore(model_instance)
+            if key_access == '.key':
+                json_data[property] = str(key)
+            else:
+                json_data[property] = key.name()
+            continue
         value = getattr_by_path(model_instance, property, None)
         value = getattr_by_path(value, 'json_data', value)
         json_data[property] = value
     return json_data
+
+def _get_included_cleanup_entities(entities, rels_seen, to_delete, to_put):
+    # Models can define a CLEANUP_REFERENCES attribute if they have
+    # reference properties that must get geleted with the model.
+    include_references = getattr(entities[0], 'CLEANUP_REFERENCES', None)
+    if include_references:
+        if not isinstance(include_references, (list, tuple)):
+            include_references = (include_references,)
+        prefetch_references(entities, include_references)
+        for entity in entities:
+            for name in include_references:
+                subentity = getattr(entity, name)
+                to_delete.append(subentity)
+                get_cleanup_entities(subentity, rels_seen=rels_seen,
+                        to_delete=to_delete, to_put=to_put)
+
+def get_cleanup_entities(instance, rels_seen=None, to_delete=None, to_put=None):
+    if not instance or getattr(instance, '__handling_delete', False):
+        return [], [], []
+
+    if to_delete is None:
+        to_delete = []
+    if to_put is None:
+        to_put = []
+    if rels_seen is None:
+        rels_seen = []
+
+    # Delete many-to-one relations
+    for related in instance._meta.get_all_related_objects():
+        # Check if we already have fetched some of the entities
+        seen = (instance.key(), related.opts, related.field.name)
+        if seen in rels_seen:
+            continue
+        rels_seen.append(seen)
+
+        entities = getattr(instance, related.get_accessor_name(),
+            related.model.all().filter(related.field.name + ' =', instance))
+        entities = entities.fetch(501)
+        for entity in entities[:]:
+            # Check if we might already have fetched this entity
+            for item in to_delete:
+                if item.key() == entity.key():
+                    entities.remove(entity)
+                    break
+            for item in to_put:
+                if item.key() == entity.key():
+                    to_put.remove(item)
+                    break
+
+        to_delete.extend(entities)
+        if len(to_delete) > 200:
+            raise Exception("Can't delete so many entities at once!")
+
+        if not entities:
+            continue
+        for entity in entities:
+            get_cleanup_entities(entity, rels_seen=rels_seen,
+                    to_delete=to_delete, to_put=to_put)
+
+        _get_included_cleanup_entities(entities, rels_seen, to_delete, to_put)
+
+
+    # Clean up many-to-many relations
+    for related in instance._meta.get_all_related_many_to_many_objects():
+        seen = (instance.key(), related.opts, related.field.name)
+        if seen in rels_seen:
+            continue
+        rels_seen.append(seen)
+        entities = getattr(instance, related.get_accessor_name(),
+            related.model.all().filter(related.field.name + ' =', instance))
+        entities = entities.fetch(501)
+        for entity in entities[:]:
+            # Check if we might already have fetched this entity
+            for item in to_put + to_delete:
+                if item.key() == entity.key():
+                    entities.remove(entity)
+                    entity = item
+                    break
+
+            # We assume that data is a list. Remove instance from the list.
+            data = getattr(entity, related.field.name)
+            data = [item for item in data
+                    if (isinstance(item, db.Key) and
+                        item != instance.key()) or
+                       item.key() != instance.key()]
+            setattr(entity, related.field.name, data)
+        to_put.extend(entities)
+        if len(to_put) > 200:
+            raise Exception("Can't change so many entities at once!")
+
+    return rels_seen, to_delete, to_put
+
+def cleanup_relations(instance, **kwargs):
+    if getattr(instance, '__handling_delete', False):
+        return
+    rels_seen, to_delete, to_put = get_cleanup_entities(instance)
+    _get_included_cleanup_entities((instance,), rels_seen, to_delete, to_put)
+    for entity in [instance] + to_delete:
+        entity.__handling_delete = True
+    if to_delete:
+        db.delete(to_delete)
+    for entity in [instance] + to_delete:
+        del entity.__handling_delete
+    if to_put:
+        db.put(to_put)
+
+class FakeModel(object):
+    """A fake model class which is stored as a string.
+
+    This can be useful if you need to emulate some model whose entities
+    get generated by syncdb and are never modified afterwards.
+    For example: ContentType and Permission.
+
+    Use this with FakeModelProperty and FakeModelListProperty (the latter
+    simulates a many-to-many relation).
+    """
+    # Important: If you want to change your fields at a later point you have
+    # to write a converter which upgrades your datastore schema.
+    fields = ()
+
+    def __init__(self, **kwargs):
+        if sorted(kwargs.keys()) != sorted(self.fields):
+            raise ValueError('You have to pass the following values to '
+                             'the constructor: %s' % ', '.join(self.fields))
+
+        for key, value in kwargs:
+            setattr(self, key, value)
+
+    class _meta(object):
+        installed = True
+
+    def get_value_for_datastore(self):
+        return simplejson.dumps([getattr(self, field) for field in fields])
+
+    @property
+    def pk(self):
+        return self.get_value_for_datastore()
+
+    @property
+    def id(self):
+        return self.pk
+
+    @classmethod
+    def load(cls, value):
+        return simplejson.loads(value)
+
+    @classmethod
+    def make_value_from_datastore(cls, value):
+        return cls(**dict(zip(cls.fields, cls.load(value))))
+
+    def __repr__(self):
+        return '<%s: %s>' % (self.__class__.__name__,
+                             ' | '.join([getattr(self, field)
+                                         for field in self.fields]))
+
+class FakeModelProperty(db.Property):
+    data_type = basestring
+
+    def __init__(self, model, *args, **kwargs):
+        self.model = model
+        super(FakeModelProperty, self).__init__(*args, **kwargs)
+
+    def validate(self, value):
+        if isinstance(value, basestring):
+            value = self.make_value_from_datastore(value)
+        if not isinstance(value, self.model):
+            raise db.BadValueError('Value must be of type %s' %
+                                   self.model.__name__)
+        if self.validator is not None:
+            self.validator(value)
+        return value
+
+    def get_value_for_datastore(self, model_instance):
+        fake_model = getattr(model_instance, self.name)
+        return fake_model.get_value_for_datastore()
+
+    def make_value_from_datastore(self, value):
+        return self.model.make_value_from_datastore(value)
+
+    def __set__(self, model_instance, value):
+        if isinstance(value, basestring):
+            value = self.make_value_from_datastore(value)
+        super(FakeModelProperty, self).__set__(model_instance, value)
+
+    @classmethod
+    def get_fake_defaults(self, fake_model, multiple=False, **kwargs):
+        from django import forms
+        choices = tuple([(item.get_value_for_datastore(), unicode(item))
+                         for item in fake_model.all()])
+        form = multiple and forms.MultipleChoiceField or forms.ChoiceField
+        defaults = {'form_class': form, 'choices': choices}
+        defaults.update(kwargs)
+        return defaults
+
+    def get_form_field(self, **kwargs):
+        defaults = FakeModelProperty.get_fake_defaults(self.model, **kwargs)
+        return super(FakeModelProperty, self).get_form_field(**defaults)
+
+class FakeModelListProperty(db.ListProperty):
+    fake_item_type = basestring
+
+    def __init__(self, model, *args, **kwargs):
+        self.model = model
+        super(FakeModelListProperty, self).__init__(
+            self.__class__.fake_item_type, *args, **kwargs)
+
+    def validate(self, value):
+        new_value = []
+        for item in value:
+            if isinstance(item, basestring):
+                item = self.make_value_from_datastore([item])[0]
+            if not isinstance(item, self.model):
+                raise db.BadValueError('Value must be of type %s' %
+                                       self.model.__name__)
+            new_value.append(item)
+        if self.validator is not None:
+            self.validator(new_value)
+        return new_value
+
+    def get_value_for_datastore(self, model_instance):
+        fake_models = getattr(model_instance, self.name)
+        return [fake_model.get_value_for_datastore()
+                for fake_model in fake_models]
+
+    def make_value_from_datastore(self, value):
+        return [self.model.make_value_from_datastore(item)
+                for item in value]
+
+    def get_value_for_form(self, instance):
+        return self.get_value_for_datastore(instance)
+
+    def make_value_from_form(self, value):
+        return self.make_value_from_datastore(value)
+
+    def get_form_field(self, **kwargs):
+        defaults = FakeModelProperty.get_fake_defaults(self.model,
+            multiple=True, **kwargs)
+        defaults['required'] = False
+        return super(FakeModelListProperty, self).get_form_field(**defaults)
+
+class KeyListProperty(db.ListProperty):
+    """Simulates a many-to-many relation using a list property.
+    
+    On the model level you interact with keys, but when used in a ModelForm
+    you get a ModelMultipleChoiceField (as if it were a ManyToManyField)."""
+
+    def __init__(self, reference_class, *args, **kwargs):
+        self._reference_class = reference_class
+        super(KeyListProperty, self).__init__(db.Key, *args, **kwargs)
+
+    @property
+    def reference_class(self):
+        if isinstance(self._reference_class, basestring):
+            from django.db import models
+            self._reference_class = models.get_model(
+                *self._reference_class.split('.', 1))
+        return self._reference_class
+
+    def validate(self, value):
+        new_value = []
+        for item in value:
+            if isinstance(item, basestring):
+                item = db.Key(item)
+            if isinstance(item, self.reference_class):
+                item = item.key()
+            if not isinstance(item, db.Key):
+                raise db.BadValueError('Value must be a key or of type %s' %
+                                       self.reference_class.__name__)
+            new_value.append(item)
+        return super(KeyListProperty, self).validate(new_value)
+
+    def get_form_field(self, **kwargs):
+        from django import forms
+        defaults = {'form_class': forms.ModelMultipleChoiceField,
+                    'queryset': self.reference_class.all(),
+                    'required': False}
+        defaults.update(kwargs)
+        return super(KeyListProperty, self).get_form_field(**defaults)

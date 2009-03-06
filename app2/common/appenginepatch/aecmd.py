@@ -5,6 +5,8 @@ COMMON_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 PROJECT_DIR = os.path.dirname(COMMON_DIR)
 ZIP_PACKAGES_DIRS = (os.path.join(PROJECT_DIR, 'zip-packages'),
                      os.path.join(COMMON_DIR, 'zip-packages'))
+# Overrides for os.environ
+env_ext = {'DJANGO_SETTINGS_MODULE': 'settings'}
 
 def setup_env(manage_py_env=False):
     """Configures app engine environment for command-line apps."""
@@ -27,25 +29,28 @@ def setup_env(manage_py_env=False):
         # Loop through all possible paths and look for the SDK dir.
         SDK_PATH = None
         for sdk_path in paths:
+            sdk_path = os.path.realpath(sdk_path)
             if os.path.exists(sdk_path):
                 SDK_PATH = sdk_path
                 break
         if SDK_PATH is None:
             # The SDK could not be found in any known location.
-            sys.stderr.write("The Google App Engine SDK could not be found!\n")
-            sys.stderr.write("See README for installation instructions.\n")
+            sys.stderr.write('The Google App Engine SDK could not be found!\n'
+                             'Visit http://code.google.com/p/app-engine-patch/'
+                             ' for installation instructions.\n')
             sys.exit(1)
         # Add the SDK and the libraries within it to the system path.
-        EXTRA_PATHS = [
-            SDK_PATH,
-            os.path.join(SDK_PATH, 'lib', 'antlr3'),
-            os.path.join(SDK_PATH, 'lib', 'webob'),
-            os.path.join(SDK_PATH, 'lib', 'yaml', 'lib'),
-        ]
-        # Add the SDK's Django version if the user didn't override it.
-        if not (os.path.isdir(os.path.join(COMMON_DIR, 'django')) or
-                os.path.isdir(os.path.join(PROJECT_DIR, 'django'))):
-            EXTRA_PATHS.append(os.path.join(SDK_PATH, 'lib', 'django'))
+        EXTRA_PATHS = [SDK_PATH]
+        lib = os.path.join(SDK_PATH, 'lib')
+        # Automatically add all packages in the SDK's lib folder:
+        for dir in os.listdir(lib):
+            path = os.path.join(lib, dir)
+            # Package can be under 'lib/<pkg>/<pkg>/' or 'lib/<pkg>/lib/<pkg>/'
+            detect = (os.path.join(path, dir), os.path.join(path, 'lib', dir))
+            for path in detect:
+                if os.path.isdir(path):
+                    EXTRA_PATHS.append(os.path.dirname(path))
+                    break
         sys.path = EXTRA_PATHS + sys.path
         from google.appengine.api import apiproxy_stub_map
 
@@ -60,65 +65,20 @@ def setup_env(manage_py_env=False):
     if not manage_py_env:
         return
 
-    # The following should only be done after patch_all()
-
-    # Disable Model validation
-    from django.core.management import validation
-    validation.get_validation_errors = lambda x, y=0: 0
-
-    # Remove unsupported commands
-    from django.core import management
-    FindCommandsInZipfile.orig = management.find_commands
-    management.find_commands = FindCommandsInZipfile
-    management.get_commands()
-    for cmd in management._commands.keys():
-        if cmd.startswith('sql') or cmd in ('adminindex', 'createcachetable',
-                'dbshell', 'inspectdb', 'runfcgi', 'syncdb', 'validate',):
-            del management._commands[cmd]
-
-def FindCommandsInZipfile(management_dir):
-    """
-    Given a path to a management directory, returns a list of all the command
-    names that are available.
-
-    This implementation also works when Django is loaded from a zip.
-
-    Returns an empty list if no commands are defined.
-    """
-    zip_marker = '.zip' + os.sep
-    if zip_marker not in management_dir:
-        return FindCommandsInZipfile.orig(management_dir)
-
-    import zipfile
-    # Django is sourced from a zipfile, ask zip module for a list of files.
-    filename, path = management_dir.split(zip_marker)
-    zipinfo = zipfile.ZipFile(filename + '.zip')
-
-    # The zipfile module returns paths in the format of the operating system
-    # that created the zipfile! This may not match the path to the zipfile
-    # itself. Convert operating system specific characters to '/'.
-    path = path.replace('\\', '/')
-    def _IsCmd(t):
-        """Returns true if t matches the criteria for a command module."""
-        t = t.replace('\\', '/')
-        return t.startswith(path) and not os.path.basename(t).startswith('_') \
-            and t.endswith('.py')
-
-    return [os.path.basename(f)[:-3] for f in zipinfo.namelist() if _IsCmd(f)]
+    print 'Running on app-engine-patch 1.0'
 
 def setup_project():
+    # Remove the standard version of Django
+    for k in [k for k in sys.modules if k.startswith('django')]:
+        del sys.modules[k]
+
     from appenginepatcher import on_production_server
-
-    # Remove the standard version of Django if the user wants to override it.
-    if 'django' in sys.modules and sys.modules['django'].VERSION[0] < 1:
-        for k in [k for k in sys.modules if k.startswith('django')]:
-            del sys.modules[k]
-
-    # We must set this env var *before* importing any part of Django
-    os.environ['DJANGO_SETTINGS_MODULE'] = 'settings'
     if on_production_server:
-        # This fixes pwd import bug for os.path.expanduser()
-        os.environ['HOME'] = PROJECT_DIR
+        # This fixes a pwd import bug for os.path.expanduser()
+        global env_ext
+        env_ext['HOME'] = PROJECT_DIR
+
+    os.environ.update(env_ext)
 
     # Add the two parent folders and appenginepatcher's lib folder to sys.path.
     # The current folder has to be added in main.py or setup_env(). This
@@ -131,16 +91,6 @@ def setup_project():
         COMMON_DIR,
     ]
 
-    # We have to import this here, so the stubs use the original Python libs
-    # and we can override them for the rest of the code below.
-    try:
-        from google.appengine.tools import appcfg
-        from google.appengine.api import urlfetch_stub
-    except ImportError:
-        pass
-
-    # Don't yet patch httplib if we'll execute a dev_appserver because
-    # urlfetch would get reloaded and then use the wrong httplib.
     this_folder = os.path.abspath(os.path.dirname(__file__))
     EXTRA_PATHS.append(os.path.join(this_folder, 'appenginepatcher', 'lib'))
 

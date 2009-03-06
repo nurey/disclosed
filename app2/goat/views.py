@@ -21,7 +21,11 @@ from django.utils import simplejson
 import traceback, logging
 logging.getLogger().setLevel(logging.DEBUG)
 
-from models import Contract, Agency, Vendor
+try:
+    from models import Contract, Agency, Vendor
+except:
+    logging.warn("Couldn't import models")
+    
 import utils
 
 def memoize(key, time=3600):
@@ -176,6 +180,27 @@ def view_contract(request, key_name):
     template_params['result'] = result
     return render_to_response('contract.html', template_params)
 
+# return array of arrays in JSON
+def visualization_chart(request, model='Agency', fetch_limit=10):
+    gql = "SELECT * FROM %s ORDER BY contract_value DESC" % model
+    try:
+        #entities = model.all().order("-contract_value").fetch(fetch_limit)
+        entities = GqlQuery(gql).fetch(int(fetch_limit))
+    except Exception:
+        logging.info(traceback.format_exc())
+        logging.info("gql was: "+gql)
+        entities = []
+        
+    json = []
+    for entity in entities:
+	    #names.append(agency.name + ": " + utils.currency(int(agency.contract_value)))
+	    entity_name = entity.name.replace('vendor ', '') #XXX remove this line when we fix Vendor.name
+	    entity_name = entity_name.replace('&amp;', '&') # vendor name has &amp;
+	    entity_name = re.sub('Canada$', '', entity_name) # agency name is too long
+	    json.append([entity_name, entity.contract_value])
+	    
+    return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
+    
 #XXX use parameterized memoize. see comments in http://appengine-cookbook.appspot.com/recipe/decorator-to-getset-from-the-memcache-automatically/
 def chart(request, model, fetch_limit):
     memcache_key = "chart:%s:%s" % (model, fetch_limit)

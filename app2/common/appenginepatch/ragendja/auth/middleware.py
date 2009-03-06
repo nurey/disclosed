@@ -22,7 +22,6 @@ class LazyGoogleUser(object):
 class GoogleAuthenticationMiddleware(object):
     def process_request(self, request):
         request.__class__.user = LazyGoogleUser(self.__class__)
-        return None
 
 class HybridAuthenticationMiddleware(GoogleAuthenticationMiddleware):
     pass

@@ -23,6 +23,43 @@
 	});
 	</script>
 
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1.1", {packages:["piechart"]});
+      google.setOnLoadCallback(fetchChart);
+	  function fetchChart() {
+			$.getJSON("/chart/Agency/20", function(entities) { drawChart(entities) });
+	  }
+	
+      function drawChart(entities) {
+		var numRows = entities.length;
+		console.log("numRows="+numRows);
+        var data = new google.visualization.DataTable();
+        data.addColumn('string', 'Agency');
+        data.addColumn('number', 'Total Value');
+        data.addRows(numRows);
+		jQuery.each(entities, function(i, val) {
+			console.log(i);
+			console.log(val);
+			data.setValue(i, 0, val[0]);
+			//data.setValue(i, 0, '<a href="/search/agency_name/'+val[0]+'">'+val[0]+'</a>');
+			data.setValue(i, 1, val[1]);
+			//data.setFormattedValue(i, 1, val[2]);
+		});
+
+        var chart = new google.visualization.PieChart(document.getElementById('visualization_agencies'));
+
+		//var formatter = new google.visualization.TablePatternFormat('<a href="/search/agency_name/{0}">{0}</a>');
+		//formatter.format(data, [0, 1]); // Apply formatter and set the formatted value of the first column.
+		
+		var formatter = new google.visualization.TableNumberFormat(
+		    {prefix: "$", negativeColor: 'red', negativeParens: true});
+		formatter.format(data, 1); // Apply formatter to second column
+	
+        chart.draw(data, {allowHtml: true, width: 900, height: 240, is3D: false, title: 'Top ' + numRows + ' Agencies', legend: 'label'});
+      }
+    </script>
+
 {% if keyword %}
 	<title>Disclosed: Search results for {{keyword|escape}}</title>
 {% else %}
@@ -185,8 +222,7 @@ a.ext-link .icon {
 {% endif  %}
 
 <div id="charts">
-	<img src="/chart/Agency/6" /><br/>
-	<img src="/chart/Vendor/12" />
+	<div id="visualization_agencies"></div>
 </div>
 
 <br/>

@@ -15,15 +15,18 @@ class Contract(search.SearchableModel):
     import_date = db.DateTimeProperty(auto_now_add=True)
     # in version 106, we changed contract_value from StringProperty to FloatProperty.
     # let's migrate, thanks to http://kupuguy.blogspot.com/2008/05/migrating-models.html
-    def __init__(self, parent=None, key=None, _app=None, contract_value=None, **kwds):
-        if contract_value is not None and type(contract_value) is not float: 
-            # remove anything but a dot or number
-            contract_value = re.sub('[^\d\.]', '', contract_value)
-            contract_value = re.sub('\.$', '', contract_value)
-            #contract_value = contract_value.replace('$','').replace(',','')
-            contract_value = float(contract_value or 0)
-        super(Contract,self).__init__(parent, key, _app, contract_value = contract_value, **kwds)
-  
+    # def __init__(self, parent=None, key=None, _app=None, contract_value=None, **kwds):
+    #     if contract_value is not None and type(contract_value) is not float: 
+    #         # remove anything but a dot or number
+    #         contract_value = re.sub('[^\d\.]', '', contract_value)
+    #         contract_value = re.sub('\.$', '', contract_value)
+    #         #contract_value = contract_value.replace('$','').replace(',','')
+    #         contract_value = float(contract_value or 0)
+    #     super(Contract,self).__init__(parent, key, _app, contract_value = contract_value, **kwds)
+    # def __init__(self, parent=None, key=None, **kwds):
+    #     key_name = self.agency_name + self.reference_number + (self.contract_date or 'foo')
+    #     super(Contract,self).__init__(parent, key_name, **kwds)
+            
 class Agency(db.Model):
 	name = db.StringProperty()
 	contract_count = db.IntegerProperty(default=0)

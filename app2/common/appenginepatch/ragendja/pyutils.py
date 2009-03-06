@@ -1,4 +1,28 @@
 # -*- coding: utf-8 -*-
+from django.utils._threading_local import local
+
+def make_tls_property(default=None):
+    """Creates a class-wide instance property with a thread-specific value."""
+    class TLSProperty(object):
+        def __init__(self):
+            self.local = local()
+
+        def __get__(self, instance, cls):
+            if not instance:
+                return self
+            return self.value
+
+        def __set__(self, instance, value):
+            self.value = value
+
+        def _get_value(self):
+            return getattr(self.local, 'value', default)
+        def _set_value(self, value):
+            self.local.value = value
+        value = property(_get_value, _set_value)
+
+    return TLSProperty()
+
 def getattr_by_path(obj, attr, *default):
     """Like getattr(), but can go down a hierarchy like 'attr.subattr'"""
     value = obj
@@ -50,7 +74,7 @@ def object_list_to_table(headings, dict_list):
         (11, 12, 13),
     ]
     """
-    return [headings] + [tuple([getattr(row, heading, None)
+    return [headings] + [tuple([getattr_by_path(row, heading, None)
                                 for heading in headings])
                          for row in dict_list]
 

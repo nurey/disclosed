@@ -7,6 +7,7 @@ from django.utils.datastructures import SortedDict
 from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext as _
 from ragendja.dbutils import prefetch_references
+from ragendja.template import LazyEncoder
 
 register = Library()
 
@@ -14,7 +15,7 @@ register.filter('prefetch_references', prefetch_references)
 
 @register.filter
 def encodejs(value):
-    return mark_safe(simplejson.dumps(value))
+    return mark_safe(simplejson.dumps(value, cls=LazyEncoder))
 
 @register.filter
 def urlquerybase(url):

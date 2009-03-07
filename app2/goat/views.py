@@ -182,22 +182,32 @@ def view_contract(request, key_name):
 
 # return array of arrays in JSON
 def visualization_chart(request, model='Agency', fetch_limit=10):
+    fetch_limit = int(fetch_limit)
     gql = "SELECT * FROM %s ORDER BY contract_value DESC" % model
     try:
         #entities = model.all().order("-contract_value").fetch(fetch_limit)
-        entities = GqlQuery(gql).fetch(int(fetch_limit))
+        entities = GqlQuery(gql).fetch(fetch_limit)
     except Exception:
         logging.info(traceback.format_exc())
         logging.info("gql was: "+gql)
         entities = []
-        
+            
     json = []
     for entity in entities:
-	    #names.append(agency.name + ": " + utils.currency(int(agency.contract_value)))
 	    entity_name = entity.name.replace('vendor ', '') #XXX remove this line when we fix Vendor.name
 	    entity_name = entity_name.replace('&amp;', '&') # vendor name has &amp;
-	    entity_name = re.sub('Canada$', '', entity_name) # agency name is too long
+	    if len(entity_name) > 25:
+	        entity_name = re.sub('Canada$', '', entity_name) # agency name is too long
 	    json.append([entity_name, entity.contract_value])
+	
+    other_entities = GqlQuery(gql).fetch(100, offset=fetch_limit)
+    others_contract_value = 0
+    others_count = 0
+    for entity in other_entities:
+        others_contract_value += float(entity.contract_value)
+        others_count += 1
+	
+    json.append([str(others_count) + ' Others', others_contract_value])
 	    
     return HttpResponse(simplejson.dumps(json), mimetype='application/javascript')
     

@@ -25,22 +25,22 @@
 
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
     <script type="text/javascript">
-      google.load("visualization", "1.1", {packages:["piechart"]});
+      google.load("visualization", "1.0", {packages:["piechart"]});
       google.setOnLoadCallback(fetchChart);
 	  function fetchChart() {
-			$.getJSON("/chart/Agency/20", function(entities) { drawChart(entities) });
+			$.getJSON("/chart/Agency/10", function(entities) { drawChart(entities) });
 	  }
 	
       function drawChart(entities) {
 		var numRows = entities.length;
-		console.log("numRows="+numRows);
+		//console.log("numRows="+numRows);
         var data = new google.visualization.DataTable();
         data.addColumn('string', 'Agency');
         data.addColumn('number', 'Total Value');
         data.addRows(numRows);
 		jQuery.each(entities, function(i, val) {
-			console.log(i);
-			console.log(val);
+			//console.log(i);
+			//console.log(val);
 			data.setValue(i, 0, val[0]);
 			//data.setValue(i, 0, '<a href="/search/agency_name/'+val[0]+'">'+val[0]+'</a>');
 			data.setValue(i, 1, val[1]);
@@ -52,11 +52,11 @@
 		//var formatter = new google.visualization.TablePatternFormat('<a href="/search/agency_name/{0}">{0}</a>');
 		//formatter.format(data, [0, 1]); // Apply formatter and set the formatted value of the first column.
 		
-		var formatter = new google.visualization.TableNumberFormat(
+		var formatter = new google.visualization.NumberFormat(
 		    {prefix: "$", negativeColor: 'red', negativeParens: true});
 		formatter.format(data, 1); // Apply formatter to second column
 	
-        chart.draw(data, {allowHtml: true, width: 900, height: 240, is3D: false, title: 'Top ' + numRows + ' Agencies', legend: 'label'});
+        chart.draw(data, {allowHtml: true, width: 900, height: 240, is3D: false, title: 'Government Spending by Agency', legend: 'label'});
       }
     </script>
 
@@ -165,14 +165,14 @@ a.ext-link .icon {
 
 {% if not keyword %}
 <h3>
-	<div id="logo_big"><img src="/static/images/logo_big.gif" width="273" height="100"/></div>
+	<div id="logo_big"><img src="/static/images/logo_big.gif" width="273" height="100" border="0" /></div>
 	Search for past contracts<!--, grants and travel expenses --> across Canadian government agencies
 </h3>
 {% endif %}
 
 <form method="get" action="/" id="search">
 {% if keyword %}
-<div id="logo_small"><img src="/static/images/logo_small.gif" width="154" height="59"/></div>
+<div id="logo_small"><a href="/"><img src="/static/images/logo_small.gif" width="154" height="59" border="0" /></a>`</div>
 {% endif %}
 <div id="keyword"><input type="text" name="keyword" size=40 value="{{keyword|escape}}"/></div>
 <div id="search_btn"><input type="submit" value="Search"/></div>

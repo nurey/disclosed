@@ -1,0 +1,19 @@
+--
+This data is provided as-is without any warranty. 
+Reasonable effort has been put in to make sure the data is accurate.
+
+Source of the data is: http://www.tbs-sct.gc.ca/pd-dp/index-eng.asp
+
+--
+The CSV column names are:
+  - uri
+  - agency name
+  - vendor name
+  - reference number
+  - contract date
+  - description of work
+  - contract period
+  - delivery date
+  - contract value
+  - comments
+

@@ -14,11 +14,10 @@ import yaml
 
 
 def main():
-  #svnversion 
   print "# DO NOT MODIFY THIS FILE. USE app.yaml.in"
-  svnversion = os.popen("svnversion -nc .. | sed -e 's/^[^:]*://;s/[A-Za-z]//'").readline().rstrip("\n");
+  gitversion = os.popen("git rev-parse HEAD").readline().rstrip("\n");
   app = yaml.load(sys.stdin)
-  app["version"] = int(svnversion)
+  app["version"] = gitversion
   print yaml.dump(app, indent=2)
 
 if __name__ == '__main__':

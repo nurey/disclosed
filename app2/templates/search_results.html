@@ -97,6 +97,7 @@ div.clear {
 }
 div#logo_big {
 	padding-bottom: 5px;
+	padding-left:102px;
 }
 div#logo_small {
 	float: left;
@@ -165,6 +166,7 @@ a.ext-link .icon {
 
 {% if not keyword %}
 <h3>
+	<a href="http://www.visiblegovernment.ca/"><img style="float:right;" src="/static/images/vg-logo2.gif" width="102" height="60" alt="VisibleGovernment" border="0" /></a>
 	<div id="logo_big"><img src="/static/images/logo_big.gif" width="273" height="100" border="0" /></div>
 	Search for past contracts<!--, grants and travel expenses --> across Canadian government agencies
 </h3>
@@ -172,6 +174,7 @@ a.ext-link .icon {
 
 <form method="get" action="/" id="search">
 {% if keyword %}
+<a href="http://www.visiblegovernment.ca/"><img style="float:right;" src="/static/images/vg-logo2.gif" width="102" height="60" alt="VisibleGovernment" border="0" /></a>
 <div id="logo_small"><a href="/"><img src="/static/images/logo_small.gif" width="154" height="59" border="0" /></a>`</div>
 {% endif %}
 <div id="keyword"><input type="text" name="keyword" size=40 value="{{keyword|escape}}"/></div>

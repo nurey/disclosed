@@ -41,6 +41,13 @@ indexes:
   - name: contract_value
     direction: desc
 
+# Used once in query history.
+- kind: Contract
+  properties:
+  - name: __searchable_text_index
+  - name: contract_date
+    direction: desc
+
 # Unused in query history -- copied from input.
 - kind: Contract
   properties:

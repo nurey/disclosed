@@ -88,6 +88,7 @@ sub new {
     $self->{agency_name} = $args->{agency_name};
     
     $self->{debug} = $args->{debug};
+    $self->{cache_on} = $args->{cache_on};
 
     bless $self, $class;
     return $self;
@@ -96,23 +97,23 @@ sub new {
 #ARGS: 
 # - agency name or alias
 sub new_from_yml {
-    my ($class, $agency_name) = @_;
+    my ($class, $agency_name, $constructor_args) = @_;
     
     my $config = LoadFile(AGENCIES_YML);
     my $agency_config = $config->{$agency_name};
     my $agency;
     if ( $agency_config ) {
         $agency_config->{agency_name} = $agency_name;
-        $agency = $class->new($agency_config);
+        $agency = $class->new({ %$agency_config, %$constructor_args });
     } else {
         # try by alias
-        $agency = $class->new_from_yml_alias($agency_name);
+        $agency = $class->new_from_yml_alias($agency_name, $constructor_args);
     }
     
     unless ( $agency ) {
         # find closest matches by alias and report
         my @matches = ();
-        my $agency_iter = $class->get_iter();
+        my $agency_iter = $class->get_iter($constructor_args);
         while ( my($agency) = $agency_iter->() ) {
             if ( $agency->{alias} =~ $agency_name ) {
                 push @matches, "$agency->{alias} - $agency->{agency_name}";
@@ -134,9 +135,9 @@ sub new_from_yml {
 #ARGS:
 # - agency alias
 sub new_from_yml_alias {
-    my ($class, $agency_alias) = @_;
+    my ($class, $agency_alias, $constructor_args) = @_;
     #XXX should be refactored into a Agency::Factory
-    my $agency_iter = $class->get_iter();
+    my $agency_iter = $class->get_iter($constructor_args);
     while ( my($agency) = $agency_iter->() ) {
         if ( $agency->{alias} eq $agency_alias ) {
             return $agency;
@@ -147,14 +148,14 @@ sub new_from_yml_alias {
 
 # return an iterator of Agency objects
 sub get_iter {
-    my ($class) = @_;
+    my ($class, $constructor_args) = @_;
     my $config = LoadFile(AGENCIES_YML);
     my @agency_names = sort keys %$config; # sort for consistency
     return sub {
         my $agency_name = shift @agency_names or return;
         my $agency_config = $config->{$agency_name};
         $agency_config->{"agency_name"} = $agency_name;
-        return $class->new($agency_config);
+        return $class->new({ %$agency_config, %$constructor_args });
     }
 }
 
@@ -164,7 +165,7 @@ sub get_csv_filename {
     $filename =~ s/\s/_/g;
     $filename = lc $filename;
     $filename .= '_contracts.csv';
-    $filename = "$ENV{GOAT_HOME}/scraper/csv/$filename";
+    $filename = "$ENV{GOAT_HOME}/data/$filename";
     return $filename;
 }
 
@@ -180,7 +181,7 @@ sub scrape_to_csv {
     my $filename = $self->get_csv_filename();
     my $stat = stat($filename);
     Agency::Exception::AlreadyScraped->throw(error=>"$filename exists. Move it out of the way and try again.") 
-        if -e $filename && $stat->size() > 0;
+        if !$args{force} && -e $filename && $stat->size() > 0;
     
     open my $csv_fh, ">:utf8", "$filename" or die "$filename: $!";
     $csv_fh->autoflush(1);
@@ -250,7 +251,8 @@ sub scrape {
 
 	#my $getter = WWW::Mechanize::Plugin::Agency->new({ agency_alias=>$self->{alias} });
 
-    $self->{mech} = WWW::Mechanize::Cached->new(
+    my $mechanize_class = $self->{cache_on} ? 'WWW::Mechanize::Cached' : 'WWW::Mechanize';
+    $self->{mech} = $mechanize_class->new(
         agent=>'Mozilla/5.0 (Macintosh; U; Intel Mac OS X; en-US; rv:1.8.1.13) Gecko/20080311 Firefox/2.0.0.13',
         stack_depth=>1, #  reduce memory usage: don't keep history of urls visited
 		cache=>Cache::FileCache->new( { cache_root => "$ENV{GOAT_HOME}/scraper/tmp/FileCache" } ),

@@ -6,13 +6,14 @@ use Getopt::Attribute;
 $| = 1; # turn on autoflush;
 
 our $force : Getopt(force 0);
+our $cache : Getopt(cache 0); #use WWW::Mechanize::Cached
 our $all : Getopt(all); 	
 
 my $agency_name = shift @ARGV;
 my $agency;
 
 if ( $all ) {
-    my $iter = Agency->get_iter();
+    my $iter = Agency->get_iter({cache_on=>$cache});
     while ( my $agency = $iter->() ) {
         eval {
             $agency->scrape_to_csv(force=>$force);
@@ -31,7 +32,7 @@ if ( $all ) {
 
 
 eval {
-    $agency = Agency->new_from_yml($agency_name);
+    $agency = Agency->new_from_yml($agency_name, {cache_on=>$cache});
 };
 if ( my $e = Exception::Class->caught('Agency::Exception') ) {
     die $e->error();

@@ -1,0 +1,38 @@
+type:      map
+mapping:
+  alias:
+    type:      str
+    required:  yes
+  start_url:
+    type:      str
+    required:  yes
+  entity_table_constraints:
+    type:      map
+    mapping:
+      "depth":
+        type:  int
+      "count":
+        type:  int
+    required:  no
+  entity_url_key_re:
+    type:      !!perl/regexp
+    required:  no
+  entity_row_xpath:
+    type:      str
+    required:  no
+  headers:
+    type:      seq
+    sequence:
+      - type:  str
+    required:  yes
+  entity_keys:
+    type:      seq
+    sequence:
+      - type:  str
+    required:  yes
+  pagination_link_url_re:
+    type:      !!perl/regexp
+    required:  no
+  pagination_link_text_re:
+    type:      !!perl/regexp
+    required:  no

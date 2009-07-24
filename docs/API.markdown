@@ -1,31 +1,29 @@
-Disclosed.ca REST API Proposal
-==============================
+# Disclosed.ca REST API Proposal
 
 This document proposes a simple RESTful HTTP based API that exposes existing
 disclosed.ca data in to easy to use, mashable representations.
 
-Notation
---------
+## Notation
 
-This API should operate at some base URL, such as:
+This API should operate at some base URL, such as `/api` or `/data`.
 
-   /api
+Variables in URI paths are denoted with a leading `:` such as `/vendors/:vid/`.  These denote this part of the path is a variable, to be replaced by the proper identifier for that resource.
 
-or
+## Representations
 
-  /data
+Every resource and collection should have these representations:
 
-Representations
----------------
+### `text/html`
 
-Resources
----------
+### `text/plain`
 
-Collections
------------
+### `application/json`
 
-Collection Options
-------------------
+## Resources
+
+## Collections
+
+## Collection Options
 
 
 

@@ -4,13 +4,29 @@ Disclosed.ca REST API Proposal
 This document proposes a simple RESTful HTTP based API that exposes existing
 disclosed.ca data in to easy to use, mashable representations.
 
-h2. Notation
+Notation
+--------
 
-h2. Representations
+This API should operate at some base URL, such as:
 
-h2. Resources
+   /api
 
-h2. Collections
+or
 
-h3. Collection Options
+  /data
 
+Representations
+---------------
+
+Resources
+---------
+
+Collections
+-----------
+
+Collection Options
+------------------
+
+
+
+ vim:tw=78

@@ -12,27 +12,31 @@ This list of resources is based on examining disclosed.ca's existing exposed dat
 
 Each agency has a collection of contracts it has disclosed.
 
-Future representation ideas:
+Fields:
+
+- `name` - Name of the agency
+- `contracts` - list of contract ID's associated with this agency.
 - `num_contracts` - number of contracts associated with this agency
 - `total_value` - total value of all contracts associated with this agency
 
 ### Contracts
 
 Each contract has:
-- an associated vendor
-- reference number (aka a contract ID)
-- a date
-- a description
-- a value (in CAD $)
-- comments
 
-Contracts may optionally also have other data bits.
+- `vendor_id` - an associated vendor
+- `contract_id` - reference number
+- `date`
+- `description`
+- `value` (in CAD $)
+- `comments`
 
 ### Vendors
 
 Each vendor has a collection of contracts they have won.
 
-Future representation ideas:
+Fields:
+- `name` - Name of the vendor
+- `contracts` - list of contract ID's associated with this vendor.
 - `num_contracts` - number of contracts associated with this vendor.
 - `total_value` - total value of all contracts associated with this vendor.
 
@@ -119,13 +123,21 @@ This API should operate at some base URL, such as `/api` or `/data`.
 ### Basic resources and collections:
 
 - `/agencies` - list of all agencies in the database
+ - Filters: `name`
+ - Orders: `name`, `num_contracts`, `total_value`
 - `/agencies/:agency_id` - a specific database identified by the given ID (or optionally name)
 - `/agencies/:agency_id/contracts` - a collection of contracts disclosed by the specified agency.
+ - Filters and Orders: See `/contracts` below.
 - `/contracts` - the list of all contracts in the database
+ - Filters: `name`, `date`
+ - Orders: `name`, `date`, `value`
 - `/contracts/:contract_id` - a specific contract identified by the given ID
 - `/vendors` - the list of all vendors in the database
+ - Filters: `name`
+ - Orders: `name`, `num_contracts`, `total_value`
 - `/vendors/:vendor_id` - a specific vendor identified by the given ID (or optionally name)
 - `/vendors/:vendor_id/contracts` - a collection of contracts awarded to the specified vendor.
+ - Filters and Orders: See `/contracts` above.
 
 ### HTTP Response Codes
 

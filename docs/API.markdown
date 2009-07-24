@@ -1,37 +1,8 @@
 # Disclosed.ca REST API Proposal
 
-This document proposes a simple RESTful HTTP based API that exposes existing
-disclosed.ca data in to easy to use, mashable representations.
+This document proposes a simple RESTful HTTP based API that exposes existing disclosed.ca data in to easy to use, mashable representations.
 
 *Status:* DRAFT
-
-## Representations
-
-Every resource and collection should have these representations:
-
-### `text/html`
-
-This representation should only be simple HTML, easily embeddable inside other applications.
-
-Other applications could apply formatting and style to the HTML, so no formatting should be displayed on this representation.
-
-Collections of resources should typically be expressed via `<ul>` and `<li>` with links to the resource.
-
-### `text/plain`
-
-This representation offers the simplest interface, useful as a programmatic interface.
-
-This interface might not include all the data about the resource, just a simple subset.  Collections should expose newline separated lists of resource identifiers.
-
-### `application/json`
-
-This representation is used by web applications and other programs to retrieve more structured data.
-
-The JSON blob should include data about the resource, and optionally also include URI links to itself and related resources.  This allows programs to "follow" paths between resources.
-
-### Optional Representations
-
-Other representations may be useful as well for particular resources or collections, such as `text/csv`, `application/xml` (eg: RSS, ...)
 
 ## Resources
 
@@ -97,6 +68,34 @@ Any collection that will potentially have many resources should accept the `limi
 
 Collections with large numbers of resources should consider a default limit for all collection requests, to avoid exposing the server to requests that are too large.  Such collections may also wish to enforce a hard limit on the number of items that can be returned.
 
+## Representations
+
+Every resource and collection should have these representations:
+
+### `text/html`
+
+This representation should only be simple HTML, easily embeddable inside other applications.
+
+Other applications could apply formatting and style to the HTML, so no formatting should be displayed on this representation.
+
+Collections of resources should typically be expressed via `<ul>` and `<li>` with links to the resource.
+
+### `text/plain`
+
+This representation offers the simplest interface, useful as a programmatic interface.
+
+This interface might not include all the data about the resource, just a simple subset.  Collections should expose newline separated lists of resource identifiers.
+
+### `application/json`
+
+This representation is used by web applications and other programs to retrieve more structured data.
+
+The JSON blob should include data about the resource, and optionally also include URI links to itself and related resources.  This allows programs to "follow" paths between resources.
+
+### Optional Representations
+
+Other representations may be useful as well for particular resources or collections, such as `text/csv`, `application/xml` (eg: RSS, ...)
+
 ## URI Layout
 
 This section describes the URI map to bind URIs to collections and resources.  Unless otherwise noted, all paths are defined for GET requests only.
@@ -113,9 +112,9 @@ Accepting both formats strikes a good balance between API accessability and func
 
 ### Notation
 
-This API should operate at some base URL, such as `/api` or `/data`.
-
 Variables in URI paths are denoted with a leading `:` such as `/vendors/:vid/`.  These denote this part of the path is a variable, to be replaced by the proper identifier for that resource.
+
+This API should operate at some base URL, such as `/api` or `/data`.
 
 ### Basic resources and collections:
 
@@ -155,3 +154,4 @@ Exposing other metadata about the resources collected by the system is useful as
 
 - `GET :collection?order=views;limit=10` - Top 10 most viewed resources of the given collection
 
+Building social features implies user accounts and this moves the simple read-only REST API to a new level of complexity. For this reason these features are considered out of scope for this document.

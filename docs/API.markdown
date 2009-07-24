@@ -2,7 +2,7 @@
 
 This document proposes a simple RESTful HTTP based API that exposes existing disclosed.ca data in to easy to use, mashable representations.
 
-*Status:* DRAFT
+*Status:* Proposal
 
 ## Resources
 

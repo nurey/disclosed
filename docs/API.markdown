@@ -5,12 +5,6 @@ disclosed.ca data in to easy to use, mashable representations.
 
 *Status:* DRAFT
 
-## Notation
-
-This API should operate at some base URL, such as `/api` or `/data`.
-
-Variables in URI paths are denoted with a leading `:` such as `/vendors/:vid/`.  These denote this part of the path is a variable, to be replaced by the proper identifier for that resource.
-
 ## Representations
 
 Every resource and collection should have these representations:
@@ -47,6 +41,10 @@ This list of resources is based on examining disclosed.ca's existing exposed dat
 
 Each agency has a collection of contracts it has disclosed.
 
+Future representation ideas:
+- `num_contracts` - number of contracts associated with this agency
+- `total_value` - total value of all contracts associated with this agency
+
 ### Contracts
 
 Each contract has:
@@ -62,6 +60,10 @@ Contracts may optionally also have other data bits.
 ### Vendors
 
 Each vendor has a collection of contracts they have won.
+
+Future representation ideas:
+- `num_contracts` - number of contracts associated with this vendor.
+- `total_value` - total value of all contracts associated with this vendor.
 
 ## Collections
 
@@ -93,6 +95,63 @@ Any collection that will potentially have many resources should accept the `limi
 
 `limit` and `order` together can be very effective for clients to display the newest resources.
 
-## URI layout
+Collections with large numbers of resources should consider a default limit for all collection requests, to avoid exposing the server to requests that are too large.  Such collections may also wish to enforce a hard limit on the number of items that can be returned.
 
-To come.
+## URI Layout
+
+This section describes the URI map to bind URIs to collections and resources.  Unless otherwise noted, all paths are defined for GET requests only.
+
+### Content Types
+
+The API should allow requests of the Content-Type through both the HTTP `Accept` header and via a file extension.
+
+- `.html` - `text/html` (also the default if no type is requested)
+- `.txt`  - `text/plain` 
+- `.json` - `application/json`
+
+Accepting both formats strikes a good balance between API accessability and function.
+
+### Notation
+
+This API should operate at some base URL, such as `/api` or `/data`.
+
+Variables in URI paths are denoted with a leading `:` such as `/vendors/:vid/`.  These denote this part of the path is a variable, to be replaced by the proper identifier for that resource.
+
+### Basic resources and collections:
+
+- `/agencies` - list of all agencies in the database
+- `/agencies/:agency_id` - a specific database identified by the given ID (or optionally name)
+- `/agencies/:agency_id/contracts` - a collection of contracts disclosed by the specified agency.
+- `/contracts` - the list of all contracts in the database
+- `/contracts/:contract_id` - a specific contract identified by the given ID
+- `/vendors` - the list of all vendors in the database
+- `/vendors/:vendor_id` - a specific vendor identified by the given ID (or optionally name)
+- `/vendors/:vendor_id/contracts` - a collection of contracts awarded to the specified vendor.
+
+### HTTP Response Codes
+
+Because the API as specified is read-only, we need very few response codes.
+
+- `200 OK` - everything is good on your GET request
+- `404 NOT FOUND` - the resource you specified could not be found
+- `407 NOT ACCEPTABLE` - the Accept type you specified is not supported
+
+### Future Considerations
+
+The following API elements are not considered for this initial API, but could be considered in future versions.
+
+Social metadata could be added to disclosed.ca and exposed via the API.
+
+These features could be implemented first by building a new REST API, and then improving the user interface to POST, PUT or DELETE to these resources.
+
+- `GET :resource/tags` - retrieve the tags applied to the specified resource
+- `PUT :resource/tags` - apply a tag to the specified resource
+- `GET :resource/comments` - retrieve the comments attached to this resource
+- `PUT :resource/comments` - add a comment about this resource
+- `GET :resource/flags` - retrieve the number of times this resource has been flagged
+- `PUT :resource/flags` - flag a resource (according to some socially defined standard of what flagging means)
+
+Exposing other metadata about the resources collected by the system is useful as well to show popular content.
+
+- `GET :collection?order=views;limit=10` - Top 10 most viewed resources of the given collection
+

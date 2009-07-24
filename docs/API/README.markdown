@@ -1,4 +1,5 @@
-h1. Disclosed.ca REST API Proposal
+Disclosed.ca REST API Proposal
+==============================
 
 This document proposes a simple RESTful HTTP based API that exposes existing
 disclosed.ca data in to easy to use, mashable representations.

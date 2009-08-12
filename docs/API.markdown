@@ -64,11 +64,12 @@ Collection order can be requested via the `order` request parameter.  Each colle
 
 ### Limit
 
-Any collection that will potentially have many resources should accept the `limit` request parameter.
+Any collection that will potentially have many resources should accept the `limit` and `offset` request parameters.
 
 - `?limit=5`
+- `?offset=15`
 
-`limit` and `order` together can be very effective for clients to display the newest resources.
+`limit` and `offset` together can be very effective for clients to display the newest resources.
 
 Collections with large numbers of resources should consider a default limit for all collection requests, to avoid exposing the server to requests that are too large.  Such collections may also wish to enforce a hard limit on the number of items that can be returned.
 
@@ -123,17 +124,17 @@ This API should operate at some base URL, such as `/api` or `/data`.
 ### Basic resources and collections:
 
 - `/agencies` - list of all agencies in the database
- - Filters: `name`
+ - Filters: `name`, `limit`, `offset`
  - Orders: `name`, `num_contracts`, `total_value`
 - `/agencies/:agency_id` - a specific database identified by the given ID (or optionally name)
 - `/agencies/:agency_id/contracts` - a collection of contracts disclosed by the specified agency.
  - Filters and Orders: See `/contracts` below.
 - `/contracts` - the list of all contracts in the database
- - Filters: `name`, `date`
+ - Filters: `name`, `date`, `limit`, `offset`
  - Orders: `name`, `date`, `value`
 - `/contracts/:contract_id` - a specific contract identified by the given ID
 - `/vendors` - the list of all vendors in the database
- - Filters: `name`
+ - Filters: `name`, `limit`, `offset`
  - Orders: `name`, `num_contracts`, `total_value`
 - `/vendors/:vendor_id` - a specific vendor identified by the given ID (or optionally name)
 - `/vendors/:vendor_id/contracts` - a collection of contracts awarded to the specified vendor.

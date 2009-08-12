@@ -14,6 +14,7 @@ Each agency has a collection of contracts it has disclosed.
 
 Fields:
 
+- `agency_id` - reference number for this agency
 - `name` - Name of the agency
 - `contracts` - list of contract ID's associated with this agency.
 - `num_contracts` - number of contracts associated with this agency
@@ -23,7 +24,8 @@ Fields:
 
 Each contract has:
 
-- `vendor_id` - an associated vendor
+- `vendor_id` - the associated vendor
+- `agency_id` - the associated agency
 - `contract_id` - reference number
 - `date`
 - `description`
@@ -35,6 +37,7 @@ Each contract has:
 Each vendor has a collection of contracts they have won.
 
 Fields:
+- `vendor_id` - reference number for this vendor
 - `name` - Name of the vendor
 - `contracts` - list of contract ID's associated with this vendor.
 - `num_contracts` - number of contracts associated with this vendor.

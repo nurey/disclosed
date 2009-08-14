@@ -20,12 +20,15 @@ use HTML::Entities ();
 use File::stat;
 use DateTimeX::Easy;
 use HTML::TreeBuilder::XPath;
+use FindBin;
 use Exception::Class 
     ( 'Agency::Exception',
       'Agency::Exception::AlreadyScraped',
       'Agency::Exception::NothingNewToScrape',
       );
 
+
+$ENV{GOAT_HOME} ||= "$FindBin::Bin/..";
 Log::Log4perl::init("$ENV{GOAT_HOME}/scraper/log.conf");
 our $logger = Log::Log4perl->get_logger();
 

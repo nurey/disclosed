@@ -267,9 +267,10 @@ sub scrape {
     my @iters = ();
     foreach my $link ( @contract_links ) {
 		my $url = $link->url_abs();
-		$url = $self->_fixup_agr_url($url);
+        #XXX hack for AGR
+        $self->_fixup_base();
         $logger->info("following link to " . $link->text() . " (url: $url)\n");
-        $self->{mech}->get($url);
+        $self->{mech}->get($link);
         if ( $self->{printable_version} ) {
             $self->{mech}->follow_link(text_regex=>qr/Printable Version/i);
         }
@@ -380,7 +381,8 @@ sub parse_contract_urls {
             }
 
             if ( $url ) {
-				$url = WWW::Mechanize::Link->new({url=>$url, tag=>'a', text=>'nada', base=>$self->{mech}->base()});
+                $self->_fixup_base();
+				$url = WWW::Mechanize::Link->new({url=>$url, tag=>'a', text=>'nada', base=>$self->{mech}->{base}});
                 $url = $self->_fixup_contract_link($url);
                 push @urls, $url;
             }
@@ -399,6 +401,13 @@ sub parse_contract_urls {
     return \@urls;
 }
 
+# XXX this a hack for AGR.
+# AGR serves Content-Location header which is unreachable. HTTP::Response uses this header to set the base of the page
+sub _fixup_base {
+    my $self = shift;
+    $self->{mech}->{base} =~ s{:7778/AAFC-AAC/jsp}{/AAFC-AAC};
+}
+
 sub parse_contracts {
     my $self = shift;
     my $html = shift;
@@ -409,7 +418,9 @@ sub parse_contracts {
             my $contract = undef;
             if ( $url ) {
 				$logger->debug("going to get a contract at " . $url->url_abs());
-                $self->{mech}->get($url->url_abs());
+                #XXX: hack for AGR
+                $self->_fixup_base();
+                $self->{mech}->get($url);
                 if ( $self->{mech}->success() ) {
 					$logger->info("parsing uri " . $self->{mech}->uri());
 					$contract = $self->parse_contract($self->{mech}->content(), $self->{mech}->uri());
@@ -605,6 +616,9 @@ sub parse_contract {
 	#XXX nserc uses 'vendor name(s)'
 	$contract->{'vendor name'} ||= delete $contract->{'vendor name(s)'};
 
+    #XXX agr uses 'value' instead of 'contract value' sometimes
+	$contract->{'contract value'} ||= delete $contract->{'value'};
+
     # XXX fixup for some contracts of National Parole Board
     if ( exists $contract->{'contrat period'} ) {
         $logger->warn("fixing 'contrat period'");
@@ -731,24 +745,32 @@ sub _fixup_contract_url {
     $url =~ s/&amp;/&/g;
     $url =~ s{\\}{/}g; # fixup for National Parole Board
 
-	$url = $self->_fixup_agr_url($url);
-    
     return $url;
 }
 
 sub _fixup_agr_url {
-	my ($self, $url) = @_;
+	my ($self, $link) = @_;
 
 	#XXX hack for Agriculture and Agri-Food Canada
 	# transform http://www4.agr.gc.ca:7778/AAFC-AAC/jsp/display-afficher.do?id=1207677963000&lang=e
 	# to
 	# http://www4.agr.gc.ca:AAFC-AAC/display-afficher.do?id=1207677963000&lang=e
 	if ( $self->{alias} eq 'agr' ) {
-		$logger->debug("agr gave us url $url");
-		$url =~ s{:7778/AAFC-AAC/jsp}{/AAFC-AAC};
+        $logger->debug("_fixup_agr_url, link base is: " . $link->base());
+		$logger->debug("_fixup_agr_url, url  " . $link->url());
+        my $base = $link->base();
+		$base =~ s{:7778/AAFC-AAC/jsp}{/AAFC-AAC};
+        $link = WWW::Mechanize::Link->new( {
+            url  => $link->url,
+            text => $link->text,
+            name => $link->name,
+            tag  => $link->tag,
+            base => $base,
+        } );
+        $logger->debug("new link is: " . Dumper $link);
 	}
 
-	return $url;
+	return $link;
 }
 
 1;

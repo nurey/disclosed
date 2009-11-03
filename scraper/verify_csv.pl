@@ -1,4 +1,4 @@
-#!/usr/bin/env perl5.10
+#!/usr/bin/perl
 
 use strict;
 use 5.10.0;

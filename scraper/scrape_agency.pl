@@ -34,8 +34,13 @@ if ( $all ) {
 eval {
     $agency = Agency->new_from_yml($agency_name, {cache_on=>$cache});
 };
-if ( my $e = Exception::Class->caught('Agency::Exception') ) {
-    die $e->error();
+if ( my $e = Exception::Class->caught() ) {
+    die $e->error() . "\n";
 }
 print "Going to scrape " . $agency->{agency_name} . "\n";
-$agency->scrape_to_csv(force=>$force);
+eval {
+    $agency->scrape_to_csv(force=>$force);
+};
+if ( my $e = Exception::Class->caught() ) {
+    die $e->error() . "\n";
+}

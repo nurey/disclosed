@@ -4,6 +4,7 @@ use strict;
 use Carp qw/cluck/;
 use HTML::TokeParser;
 use HTML::TableExtract;
+use LWP::UserAgent::Determined;
 use WWW::Mechanize::Cached;
 use WWW::Mechanize::Plugin::Retry;
 #use MechanizePluginAgency;
@@ -14,18 +15,21 @@ use WWW::Mechanize::Link;
 use Text::CSV_XS;
 use Data::Dumper;
 use FileHandle;
-use YAML::XS qw/LoadFile/;
+use YAML::Any qw/LoadFile/;
 use Log::Log4perl;
 use HTML::Entities ();
 use File::stat;
 use DateTimeX::Easy;
 use HTML::TreeBuilder::XPath;
 use FindBin;
+use File::CountLines qw/count_lines/;
+use File::stat;
 use Exception::Class 
     ( 'Agency::Exception',
       'Agency::Exception::AlreadyScraped',
       'Agency::Exception::NothingNewToScrape',
       );
+
 
 
 $ENV{GOAT_HOME} ||= "$FindBin::Bin/..";
@@ -45,6 +49,9 @@ sub new {
     
     # developer notes for the agency
     $self->{notes} = $args->{notes};
+    
+    # whether to scrape
+    $self->{ignore} = $args->{ignore};
     
     # the starting url for WWW::Mechanize
     $self->{start_url} = $args->{start_url};
@@ -101,7 +108,7 @@ sub new {
 # - agency name or alias
 sub new_from_yml {
     my ($class, $agency_name, $constructor_args) = @_;
-    
+    $constructor_args ||= {};
     my $config = LoadFile(AGENCIES_YML);
     my $agency_config = $config->{$agency_name};
     my $agency;
@@ -112,7 +119,6 @@ sub new_from_yml {
         # try by alias
         $agency = $class->new_from_yml_alias($agency_name, $constructor_args);
     }
-    
     unless ( $agency ) {
         # find closest matches by alias and report
         my @matches = ();
@@ -139,19 +145,23 @@ sub new_from_yml {
 # - agency alias
 sub new_from_yml_alias {
     my ($class, $agency_alias, $constructor_args) = @_;
+    $constructor_args ||= {};
     #XXX should be refactored into a Agency::Factory
     my $agency_iter = $class->get_iter($constructor_args);
+    my $found_agency = undef;
     while ( my($agency) = $agency_iter->() ) {
         if ( $agency->{alias} eq $agency_alias ) {
-            return $agency;
+            $found_agency = $agency;
+            last;
         }
     }
-    return;
+    return $found_agency;
 }
 
 # return an iterator of Agency objects
 sub get_iter {
     my ($class, $constructor_args) = @_;
+    $constructor_args ||= {};
     my $config = LoadFile(AGENCIES_YML);
     my @agency_names = sort keys %$config; # sort for consistency
     return sub {
@@ -177,6 +187,10 @@ sub scrape_to_csv {
     my (%args) = @_;
     
 
+    if ( $self->{ignore} eq 'yes' ) {
+        Agency::Exception->throw(error=>"$self->{agency_name} is configured not to be scraped (see ignore attribute in agencies.yaml)");
+    }
+    
 #   if ( !$self->has_newer_records() && !$args{force} ) {
 #       Agency::Exception::NothingNewToScrape->throw(error=>"There are no new records to scrape");
 #   }
@@ -261,15 +275,21 @@ sub scrape {
 		cache=>Cache::FileCache->new( { cache_root => "$ENV{GOAT_HOME}/scraper/tmp/FileCache" } ),
         );
     
-    $logger->info("starting scrape of $self->{agency_name}");
+    $logger->info("starting scrape of $self->{agency_name} using $mechanize_class");
     # get lists of contracts
     my @contract_links = $self->get_contract_links();
     my @iters = ();
     foreach my $link ( @contract_links ) {
 		my $url = $link->url_abs();
         #XXX hack for AGR
-        $self->_fixup_base();
+#$self->_fixup_base();
+        # XXX hack for NFB: 2008-2009 1st Quarter is an invalid link
+        if ( $self->{alias} eq 'nfb' && $url =~ m{/eng/eng/} ) {
+            $url =~ s{/eng/eng/}{/eng/};
+            $link = WWW::Mechanize::Link->new({url=>$url, tag=>'a', text=>$link->text(), base=>$self->{mech}->{base}});
+        }
         $logger->info("following link to " . $link->text() . " (url: $url)\n");
+        $logger->debug("base is: " . $self->{mech}->base());
         $self->{mech}->get($link);
         if ( $self->{printable_version} ) {
             $self->{mech}->follow_link(text_regex=>qr/Printable Version/i);
@@ -280,6 +300,7 @@ sub scrape {
         }
         my $contract_iter = $self->parse_contracts($self->{mech}->{content});
         push @iters, $contract_iter;
+        $self->{mech}->back();
     }
     return @iters;
 }
@@ -299,6 +320,7 @@ sub get_contract_links {
         #       $logger->info("following link to Reports");
         #       $self->{mech}->follow_link(text_regex=>qr/Reports/);
         #   }
+        $logger->info($self->{mech}->status());
         if ( $self->{quarter_links_url_regex} ) {
             @links = $self->{mech}->find_all_links(url_regex=>qr/$self->{quarter_links_url_regex}/i);
         }
@@ -384,6 +406,7 @@ sub parse_contract_urls {
                 $self->_fixup_base();
 				$url = WWW::Mechanize::Link->new({url=>$url, tag=>'a', text=>'nada', base=>$self->{mech}->{base}});
                 $url = $self->_fixup_contract_link($url);
+                #$logger->debug(Dumper $url);
                 push @urls, $url;
             }
         }
@@ -420,17 +443,28 @@ sub parse_contracts {
 				$logger->debug("going to get a contract at " . $url->url_abs());
                 #XXX: hack for AGR
                 $self->_fixup_base();
-                $self->{mech}->get($url);
+                $self->{mech}->get($url->url_abs());
+#my $ua = LWP::UserAgent::Determined->new();
+#my $response = $ua->get($url->url_abs());
+#               if ( $response->success() ) {
+#					$logger->info("parsing uri " . $url->url_abs());
+#					$contract = $self->parse_contract($response->content(), $url->url_abs());
+#				}
+#				else {
+#                    $logger->error("Failed to get url " . $url->url_abs()
+#                        . ", skipping to next one. HTTP status code was: " 
+#                        . $response->status_line());
+#               }
+
                 if ( $self->{mech}->success() ) {
-					$logger->info("parsing uri " . $self->{mech}->uri());
-					$contract = $self->parse_contract($self->{mech}->content(), $self->{mech}->uri());
-				}
+					$logger->info("parsing uri " . $url->url_abs());
+					$contract = $self->parse_contract($self->{mech}->content(), $url->url_abs());
+                }
 				else {
                     $logger->error("Failed to get url " . $url->url_abs()
                         . ", skipping to next one. HTTP status code was: " 
                         . $self->{mech}->status());
                 }
-                $self->{mech}->back(); # our history stack depth is 1 so we can go back once
             }
             if ( !$contract ) {
                 $logger->error("parsing url " . $url->url_abs() . ": no contract could be parsed, skipping to next one");
@@ -442,13 +476,12 @@ sub parse_contracts {
     }
 }
 
-#XXX this needs a proper name or a different namespace 
 # parse a space (Canadian Space Agency) type contract out of a div based html table.
 # eg. 
 # <div class="$entity_attribute_class">Description of Work:</div>
 # <div class="$entity_value_class">OTHER PROFESSIONAL SERVICES </div>
 # </div>
-sub parse_space_contract_via_xpath {
+sub parse_contract_via_xpath_exact {
     my $self = shift;
     my $html = shift;
     my $uri = shift;
@@ -457,7 +490,7 @@ sub parse_space_contract_via_xpath {
     $p->parse_content($html);
     my @attributes =  map { $_->getValue() } $p->findnodes(qq{//div[\@class="$self->{entity_attribute_class}"]});
     my @values =  map { $_->getValue() } $p->findnodes(qq{//div[\@class="$self->{entity_value_class}"]});
-    #print Dumper \@list;
+    print Dumper \@attributes;
     # turn the list of key/value pairs into a list of lists
     my @lol = ();
     while ( @attributes ) {
@@ -523,10 +556,12 @@ sub find_contract_table {
     # Examine all tables
     my $key = '';
     my @coords = (undef, undef);
+    my $vendor_key = $self->{entity_keys}->[2];
     MAIN: foreach my $ts ($te->tables) {
         foreach my $row ($ts->rows) {
             $key = $row->[0];
-            if ( $key && $key =~ /vendor/i ) {
+            $key = $self->_clean_entity_key($key);
+            if ( $key && $key =~ /$vendor_key/i ) {
                 @coords = $ts->coords();
                 last MAIN;
             }
@@ -567,6 +602,21 @@ sub parse_contract_via_tableextract {
 	return @rows;
 }
 
+my $nbsp = HTML::Entities::decode_entities('&nbsp;');
+sub _clean_entity_key {
+    my $self = shift;
+    my $key = shift;
+    $key =~ s/&nbsp;/ /g;
+    $key =~ s/$nbsp/ /g;
+    $key =~ s/^\s*//;
+    $key =~ s/\s*$//;
+    $key =~ s/\s{0,}\:\s{0,}//;
+    $key =~ s/[\n\r]/ /g;
+    $key =~ s/\*//g; # CSBS has "*Contract Period"
+    $key =~ s/\s{2,}/ /; # replace two or more spaces with one space
+    return $key;
+}
+
 sub parse_contract {
     my $self = shift;
     my $html = shift;
@@ -577,25 +627,17 @@ sub parse_contract {
         @rows = $self->parse_contract_via_xpath($html, $uri);
     }
 	elsif ( $self->{entity_attribute_class} ) {
-        @rows = $self->parse_space_contract_via_xpath($html, $uri);
+        @rows = $self->parse_contract_via_xpath_exact($html, $uri);
 	}
     else {
         @rows = $self->parse_contract_via_tableextract($html, $uri);
     }
 
     my $contract = {};
-    my $nbsp = HTML::Entities::decode_entities('&nbsp;');
     foreach my $row ( @rows ) {
         #print Dumper $row;
         my $key = $row->[0];
-        $key =~ s/&nbsp;/ /g;
-        $key =~ s/$nbsp/ /g;
-        $key =~ s/^\s*//;
-        $key =~ s/\s*$//;
-        $key =~ s/\s{0,}\:\s{0,}//;
-        $key =~ s/[\n\r]/ /g;
-        $key =~ s/\*//g; # CSBS has "*Contract Period"
-        $key =~ s/\s{2,}/ /; # replace two or more spaces with one space
+        $key = $self->_clean_entity_key($key);
         my $value = $row->[1] || $row->[2]; #XXX: not sure why it's element 2 for Environment Canada
         if ( $value ) {
             $value =~ s/[\n\r]/ /g;
@@ -771,6 +813,35 @@ sub _fixup_agr_url {
 	}
 
 	return $link;
+}
+
+# create a spreadsheet (CSV) with Agency Name, Contract Count, Scraped Status (Yes/No/Partial), Last Scrape Date, Notes
+my @REPORT_COLS = ('Agency Name', 'Contract Count', 'Scraped Status (Yes/No/Partial)', 'Last Scrape Date', 'Notes');
+sub create_report {
+    my ($self) = @_;
+    
+    my $agency_iter = __PACKAGE__->get_iter();
+    open my $csv_fh, ">$ENV{GOAT_HOME}/scraper/report.csv" or die $!;
+    my $csv = Text::CSV_XS->new();
+    $csv->combine(@REPORT_COLS);
+    print $csv_fh $csv->string() . "\n";
+    while ( my $agency = $agency_iter->() ) {
+        my $filename = $agency->get_csv_filename();
+        my $count = -e $filename ? count_lines($filename) : 0;
+        my $status = $count > 0 ? 'Y' : 'N';
+        my $stat = stat($filename);
+        my $date = $stat ? scalar localtime $stat->mtime() : 'N/A';
+        my $notes = $agency->{notes};
+        if ( $csv->combine($agency->{agency_name}, $count, $status, $date, $notes) ) {
+            my $string = $csv->string();
+            print $csv_fh "$string\n";
+        }
+        else {
+            my $err = $csv->error_input();
+            $logger->error("combine () failed on argument: $err");
+        }
+    }
+    close $csv_fh;
 }
 
 1;

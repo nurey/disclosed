@@ -286,8 +286,8 @@ Canadian Space Agency:
   entity_keys: *entity_keys001
   entity_url_key_re: !!perl/regexp (?-xism:contracts\-d\.asp)
 ## at one point they switched the contract layout to divs and then they switched back to tables
-#  entity_attribute_class: floatLeft width27 borderLeft height15 alignRight
-#  entity_value_class: floatLeft width71 borderFull height15
+#  entity_attribute_xpath: //div[@class="floatLeft width27 borderLeft height15 alignRight"]
+#  entity_value_xpath: //div[@class="floatLeft width71 borderFull height15"]
     
 Canadian Transportation Agency:
   alias: cta
@@ -389,8 +389,8 @@ Office of the Correctional Investigator:
   start_url: http://www.oci-bec.gc.ca/disc-div/cont/rpt-eng.aspx
 #  headers: *headers001
 #  entity_keys: *entity_keys001
-#  entity_attribute_class: innerRow topMargin15
-#  entity_value_class: cell
+#  entity_attribute_xpath: //div[@class="innerRow topMargin15"]
+#  entity_value_xpath: //div[@class="cell"]
   
 Correctional Service of Canada:
   alias: csc
@@ -454,14 +454,16 @@ Hazardous Materials Information Review Commission:
   headers: *headers001
   entity_keys: *entity_keys001
   
-# list of contracts have pagination, but there's a printable version which lists all on one page
+# list of contracts have pagination, but we hack the url for each list of contracts
 Health Canada:
   alias: hc
-  ignore: yes
-  notes: "contract format has changed, see http://github.com/nurey/disclosed/issues/#issue/25"
+  ignore: no
+  notes:
   start_url: http://www.contracts-contrats.hc-sc.gc.ca/cfob/mssid/contractdisc.nsf/webGetbyperiod?OpenView&Count=1000&ExpandAll&lang=eng&
   headers: *headers001
   entity_keys: *entity_keys001
+  entity_attribute_xpath: //h3
+  entity_value_xpath: //div[@class="center"]/div/p
     
 Human Resources and Social Development Canada:
   alias: hrsdc
@@ -510,14 +512,15 @@ Industry Canada:
   
 Office of the Information Commissioner:
   ignore: yes
+  notes: non standard listing of contracts
   alias: infocom
   start_url: http://www.infocom.gc.ca/expenses/contracts/2006_2007-e.asp
-  notes: non standard listing of contracts
   
 Infrastructure Canada:
   alias: infrastructure
+  ignore: yes
+  notes: "contract format has changed. See http://github.com/nurey/disclosed/issues#issue/24"
   start_url: http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?t1=r
-  notes:
   headers: *headers001
   entity_keys: *entity_keys001
   quarter_links_url_regex: !!perl/regexp (?-xism:reports-rapports-eng.php)

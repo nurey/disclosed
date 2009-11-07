@@ -91,8 +91,8 @@ sub new {
     # a way to parse a table using xpath 
     $self->{entity_row_xpath} = $args->{entity_row_xpath};
 
-    $self->{entity_attribute_class} = $args->{entity_attribute_class};
-    $self->{entity_value_class} = $args->{entity_value_class};
+    $self->{entity_attribute_xpath} = $args->{entity_attribute_xpath};
+    $self->{entity_value_xpath} = $args->{entity_value_xpath};
     
     # the agency name. eg., Parks Canada
     $self->{agency_name} = $args->{agency_name};
@@ -326,6 +326,13 @@ sub get_contract_links {
         }
         else {
             @links = $self->{mech}->find_all_links(text_regex=>qr/Quarter/i);
+            if ($self->{alias} eq 'hc') {
+                @links = map { 
+                    my $url = $_->url();
+                    $url =~ s{Count=\d+}{Count=200000};
+                    WWW::Mechanize::Link->new({url=>$url, tag=>'a', text=>$_->text()});
+                } @links;
+            }
         }
     }
     return @links;
@@ -488,9 +495,9 @@ sub parse_contract_via_xpath_exact {
     
     my $p = HTML::TreeBuilder::XPath->new();
     $p->parse_content($html);
-    my @attributes =  map { $_->getValue() } $p->findnodes(qq{//div[\@class="$self->{entity_attribute_class}"]});
-    my @values =  map { $_->getValue() } $p->findnodes(qq{//div[\@class="$self->{entity_value_class}"]});
-    print Dumper \@attributes;
+    my @attributes =  map { $_->getValue() } $p->findnodes($self->{entity_attribute_xpath});
+    my @values =  map { $_->getValue() } $p->findnodes($self->{entity_value_xpath});
+    #print Dumper \@attributes;
     # turn the list of key/value pairs into a list of lists
     my @lol = ();
     while ( @attributes ) {
@@ -626,7 +633,7 @@ sub parse_contract {
     if ( $self->{entity_row_xpath} ) {
         @rows = $self->parse_contract_via_xpath($html, $uri);
     }
-	elsif ( $self->{entity_attribute_class} ) {
+	elsif ( $self->{entity_attribute_xpath} ) {
         @rows = $self->parse_contract_via_xpath_exact($html, $uri);
 	}
     else {

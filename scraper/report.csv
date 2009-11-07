@@ -7,7 +7,7 @@
 "Canada Revenue Agency",13286,Y,"Tue Oct 27 16:30:59 2009",
 "Canada School of Public Service",4356,Y,"Thu Oct 29 14:13:37 2009",
 "Canadian Artists and Producers Professional Relations Tribunal",12,Y,"Mon Nov  2 15:17:09 2009",
-"Canadian Centre for Occupational Health and Safety",0,N,N/A,"XXX not much contracts"
+"Canadian Centre for Occupational Health and Safety",0,N,N/A,"multiple contract detail tables per page"
 "Canadian Environmental Assessment Agency",307,Y,"Thu Oct 29 14:18:01 2009",
 "Canadian Food Inspection Agency",5326,Y,"Thu Oct 29 14:41:57 2009",
 "Canadian Forces Grievance Board",77,Y,"Mon Nov  2 16:08:56 2009",
@@ -46,7 +46,7 @@
 "Immigration and Refugee Board of Canada",0,N,N/A,"non standard listing of contracts"
 "Indian and Northern Affairs Canada",9940,Y,"Fri Oct 30 02:46:26 2009",
 "Industry Canada",10697,Y,"Fri Oct 30 03:25:42 2009",
-"Infrastructure Canada",0,N,N/A,"contract format has changed. See http://github.com/nurey/disclosed/issues#issue/24"
+"Infrastructure Canada",553,Y,"Sat Nov  7 15:47:15 2009",
 "Libraries and Archives Canada",1487,Y,"Fri Oct 30 03:32:59 2009",
 "Military Policy Complaints Commission",0,N,N/A,"non standard contract details (no table) and not much contracts"
 "NAFTA Secretariat",26,Y,"Mon Nov  2 17:53:52 2009",
@@ -62,7 +62,7 @@
 "Office of the Auditor General of Canada",1359,Y,"Sat Oct 31 15:46:22 2009",
 "Office of the Commissioner for Federal Judicial Affairs",326,Y,"Sat Oct 31 15:47:26 2009",
 "Office of the Commissioner of Official Languages",728,Y,"Sat Oct 31 15:49:13 2009",
-"Office of the Correctional Investigator",0,N,"Mon Nov  2 17:07:02 2009","very low number of contracts and haven't figured out a way to scrape"
+"Office of the Correctional Investigator",41,Y,"Sat Nov  7 15:55:25 2009",
 "Office of the Information Commissioner",0,N,N/A,"non standard listing of contracts"
 "Office of the Superintendent of Financial Institutions Canada",1263,Y,"Sat Oct 31 15:52:11 2009",
 "Office of the Veterans Ombudsman",10,Y,"Tue Oct 27 13:49:00 2009",

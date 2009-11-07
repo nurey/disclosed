@@ -125,10 +125,14 @@ Canadian Artists and Producers Professional Relations Tribunal:
   entity_keys: *entity_keys001
   
 Canadian Centre for Occupational Health and Safety:
-  notes: XXX not much contracts
+  ignore: yes
+  notes: multiple contract detail tables per page
   alias: ccohs
-  start_url: http://www.ccohs.ca/ccohs/reports/contracts_disclosure/
-
+  contracts_links: 
+    - url: http://www.ccohs.ca/ccohs/reports/contracts_disclosure/
+  headers: *headers001
+  entity_keys: *entity_keys001
+  
 Canadian Environmental Assessment Agency:
   alias: ceaa
   start_url: http://www.ceaa-acee.gc.ca/contracts-contrats/index-eng.cfm?state=reports
@@ -383,14 +387,14 @@ Copyright Board Canada:
   start_url: http://www.cb-cda.gc.ca/about-apropos/disclosure-divulgation/contracts-contrats/index-e.html
   
 Office of the Correctional Investigator:
-  ignore: yes
+  ignore: no
   alias: oci
-  notes: very low number of contracts and haven't figured out a way to scrape
+  notes: 
   start_url: http://www.oci-bec.gc.ca/disc-div/cont/rpt-eng.aspx
-#  headers: *headers001
-#  entity_keys: *entity_keys001
-#  entity_attribute_xpath: //div[@class="innerRow topMargin15"]
-#  entity_value_xpath: //div[@class="cell"]
+  headers: *headers001
+  entity_keys: *entity_keys001
+  entity_attribute_xpath: //div[@class="cell bgGrey alignRight"]/strong
+  entity_value_xpath: //div[@class="col width65"]/div
   
 Correctional Service of Canada:
   alias: csc
@@ -518,12 +522,14 @@ Office of the Information Commissioner:
   
 Infrastructure Canada:
   alias: infrastructure
-  ignore: yes
-  notes: "contract format has changed. See http://github.com/nurey/disclosed/issues#issue/24"
+  ignore: no
+  notes:
   start_url: http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?t1=r
   headers: *headers001
   entity_keys: *entity_keys001
   quarter_links_url_regex: !!perl/regexp (?-xism:reports-rapports-eng.php)
+  entity_attribute_xpath: //div[@class="center"]/p/strong
+  entity_value_xpath: //div[@class="center"]/p[strong]/text()
 
 Department of Justice Canada:
   alias: justice

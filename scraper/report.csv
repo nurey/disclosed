@@ -1,0 +1,95 @@
+"Agency Name","Contract Count","Scraped Status (Yes/No/Partial)","Last Scrape Date",Notes
+"Agriculture and Agri-Food Canada",10423,Y,"Tue Oct 27 13:35:31 2009",
+"Atlantic Canada Opportunites Agency",1337,Y,"Thu Oct 29 12:55:14 2009",
+"Canada Border Services Agency",5391,Y,"Thu Oct 29 13:12:43 2009",
+"Canada Economic Development for Quebec Regions",763,Y,"Thu Oct 29 13:19:03 2009",
+"Canada Industrial Relations Board",113,Y,"Thu Oct 29 13:19:45 2009",
+"Canada Revenue Agency",13286,Y,"Tue Oct 27 16:30:59 2009",
+"Canada School of Public Service",4356,Y,"Thu Oct 29 14:13:37 2009",
+"Canadian Artists and Producers Professional Relations Tribunal",12,Y,"Mon Nov  2 15:17:09 2009",
+"Canadian Centre for Occupational Health and Safety",0,N,N/A,"XXX not much contracts"
+"Canadian Environmental Assessment Agency",307,Y,"Thu Oct 29 14:18:01 2009",
+"Canadian Food Inspection Agency",5326,Y,"Thu Oct 29 14:41:57 2009",
+"Canadian Forces Grievance Board",77,Y,"Mon Nov  2 16:08:56 2009",
+"Canadian Grain Commission",10,Y,"Tue Oct 27 14:08:43 2009",
+"Canadian Heritage",4611,Y,"Thu Oct 29 15:08:18 2009",
+"Canadian Human Rights Commission",266,Y,"Tue Oct 27 13:39:30 2009",
+"Canadian Human Rights Tribunal",44,Y,"Mon Nov  2 16:23:33 2009","not much contracts"
+"Canadian Institutes of Health Research",0,N,N/A,"the listing of reports is non standard"
+"Canadian Intergovernmental Conference Secretariat",0,N,N/A,"the listing of reports is non standard"
+"Canadian International Development Agency",6370,Y,"Thu Oct 29 16:07:57 2009",
+"Canadian International Trade Tribunal",137,Y,"Mon Nov  2 16:38:24 2009","not much contracts"
+"Canadian Nuclear Safety Commission",1778,Y,"Thu Oct 29 16:25:16 2009",
+"Canadian Polar Commission",0,N,N/A,"not much contracts; non standard listing"
+"Canadian Radio-television and Telecommunications Commission",825,Y,"Thu Oct 29 16:28:01 2009",
+"Canadian Space Agency",490,Y,"Thu Oct 29 17:28:27 2009",
+"Canadian Transportation Agency",229,Y,"Thu Oct 29 19:36:03 2009",
+"Citizenship and Immigration Canada",2209,Y,"Thu Oct 29 19:50:21 2009",
+"Commission for Public Complaints Against the RCMP",160,Y,"Mon Nov  2 16:47:28 2009","not much contracts"
+"Commissioner of Lobbying of Canada",0,N,N/A,"not much contracts"
+"Competition Tribunal",0,N,N/A,"non standard listing of contracts and very low number of contracts"
+"Copyright Board Canada",0,N,N/A,"non standard listing of contracts and very low number of contracts"
+"Correctional Service of Canada",15134,Y,"Thu Oct 29 20:35:54 2009",
+"Courts Administration Service",487,Y,"Tue Oct 27 13:59:52 2009",
+"Department of Finance Canada",1999,Y,"Thu Oct 29 20:43:29 2009",
+"Department of Justice Canada",3804,Y,"Thu Oct 29 20:57:38 2009",
+"Elections Canada",2455,Y,"Thu Oct 29 21:18:03 2009",
+"Environment Canada",10303,Y,"Sun Nov  1 13:38:37 2009",
+"Financial Consumer Agency of Canada",227,Y,"Sun Nov  1 21:19:54 2009",
+"Financial Transactions and Reports Analysis Centre of Canada",385,Y,"Thu Oct 29 21:20:55 2009",
+"Fisheries and Oceans Canada",25068,Y,"Thu Oct 29 22:55:19 2009",
+"Foreign Affairs and International Trade Canada",13865,Y,"Fri Oct 30 01:56:05 2009",
+"Governor General",255,Y,"Mon Nov  2 10:52:00 2009",
+"Hazardous Materials Information Review Commission",38,Y,"Mon Nov  2 17:39:50 2009",
+"Health Canada",20906,Y,"Sat Nov  7 14:13:17 2009",
+"Human Resources and Social Development Canada",3958,Y,"Fri Oct 30 02:15:50 2009",
+"Immigration and Refugee Board of Canada",0,N,N/A,"non standard listing of contracts"
+"Indian and Northern Affairs Canada",9940,Y,"Fri Oct 30 02:46:26 2009",
+"Industry Canada",10697,Y,"Fri Oct 30 03:25:42 2009",
+"Infrastructure Canada",0,N,N/A,"contract format has changed. See http://github.com/nurey/disclosed/issues#issue/24"
+"Libraries and Archives Canada",1487,Y,"Fri Oct 30 03:32:59 2009",
+"Military Policy Complaints Commission",0,N,N/A,"non standard contract details (no table) and not much contracts"
+"NAFTA Secretariat",26,Y,"Mon Nov  2 17:53:52 2009",
+"National Defense and the Canadian Forces",50200,Y,"Fri Oct 30 06:46:38 2009",
+"National Energy Board",0,N,N/A,"contract value is not getting scraped"
+"National Farm Products Council",0,N,N/A,"not much contracts. non standard listing of contracts"
+"National Film Board",738,Y,"Sun Nov  1 12:00:19 2009",
+"National Parole Board",438,Y,"Fri Oct 30 06:51:52 2009","XXX scraped partially, the Q4 2007-2008 link returns html source with broken links"
+"National Research Council Canada",13452,Y,"Sat Oct 31 14:54:13 2009",
+"National Round Table on the Environment and the Economy",260,Y,"Mon Nov  2 18:12:19 2009",
+"Natural Resources Canada",11543,Y,"Sat Oct 31 15:41:01 2009",
+"Natural Sciences and Engineering Research Council of Canada",306,Y,"Sat Oct 31 15:42:13 2009",
+"Office of the Auditor General of Canada",1359,Y,"Sat Oct 31 15:46:22 2009",
+"Office of the Commissioner for Federal Judicial Affairs",326,Y,"Sat Oct 31 15:47:26 2009",
+"Office of the Commissioner of Official Languages",728,Y,"Sat Oct 31 15:49:13 2009",
+"Office of the Correctional Investigator",0,N,"Mon Nov  2 17:07:02 2009","very low number of contracts and haven't figured out a way to scrape"
+"Office of the Information Commissioner",0,N,N/A,"non standard listing of contracts"
+"Office of the Superintendent of Financial Institutions Canada",1263,Y,"Sat Oct 31 15:52:11 2009",
+"Office of the Veterans Ombudsman",10,Y,"Tue Oct 27 13:49:00 2009",
+"Parks Canada",8550,Y,"Sat Oct 31 16:34:14 2009",
+"Patented Medicine Prices Review Board",134,Y,"Sat Oct 31 16:37:20 2009",
+"Privacy Commissioner of Canada",580,Y,"Sat Oct 31 16:39:52 2009",
+"Privy Council Office",2136,Y,"Mon Nov  2 18:22:02 2009",
+"Public Health Agency of Canada",4301,Y,"Sun Nov  1 03:24:09 2009",
+"Public Safety Canada",2013,Y,"Sun Nov  1 04:15:56 2009",
+"Public Sector Integrity Canada",27,Y,"Mon Nov  2 18:22:49 2009",
+"Public Service Commission",1268,Y,"Sun Nov  1 04:18:05 2009",
+"Public Service Labour Relations Board",181,Y,"Sun Nov  1 04:19:26 2009",
+"Public Service Staffing Tribunal",51,Y,"Sun Nov  1 04:19:36 2009",
+"Public Works and Government Services Canada",41325,Y,"Wed Oct 28 06:34:44 2009",
+RCMP,20716,Y,"Wed Oct 28 19:05:13 2009",
+"RCMP External Review Committee",16,Y,"Mon Nov  2 18:31:46 2009",
+"Security Intelligence Review Committee",0,N,N/A,"not much contracts and complicated to scrape"
+"Service Canada",3734,Y,"Sun Nov  1 04:45:38 2009",
+"Social Sciences and Humanities Research Council of Canada",0,N,N/A,
+"Statistics Canada",3262,Y,"Sun Nov  1 04:54:19 2009",
+"Status of Women Canada",251,Y,"Sun Nov  1 04:55:09 2009",
+"Supreme Court of Canada",497,Y,"Mon Nov  2 23:07:37 2009",
+"Telefilm Canada",923,Y,"Mon Nov  2 11:20:57 2009",
+"Transport Canada",11030,Y,"Sun Nov  1 05:32:04 2009","server crashes partway thru, ""Unknown web server environment. No database connection was established."""
+"Transportation Appeal Tribunal of Canada",7,Y,"Mon Nov  2 23:10:45 2009",
+"Transportation Safety Board of Canada",352,Y,"Mon Nov  2 23:15:54 2009",
+"Treasury Board of Canada Secretariat",2161,Y,"Sun Nov  1 05:41:59 2009",
+"Veterans Affairs Canada",2172,Y,"Sun Nov  1 05:56:15 2009",
+"Veterans Review and Appeal Board Canada",45,Y,"Sun Nov  1 09:59:51 2009",
+"Western Economic Diversification Canada",694,Y,"Sun Nov  1 06:05:10 2009",

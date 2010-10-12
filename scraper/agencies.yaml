@@ -1,5 +1,7 @@
 ---
 Environment Canada:
+  notes: Server Error on 10/11/2010
+  ignore: yes
   alias: ec
   entity_keys: &entity_keys001
   - uri
@@ -272,7 +274,7 @@ Canadian Nuclear Safety Commission:
 Canadian Polar Commission:
   notes: not much contracts; non standard listing
   alias: polar
-  start_url: http://www.polarcom.gc.ca/content.php?doc=44
+  start_url: http://www.polarcom.gc.ca/index.php?page=reports&hl=en_US
 
 Canadian Radio-television and Telecommunications Commission:
   alias: crtc
@@ -498,10 +500,13 @@ Indian and Northern Affairs Canada:
 
 #XXX: delivery date is rolled into contract period. in other words there's no delivery date
 Industry Canada:
+  notes: contract value parser not working here
+  ignore: yes
   alias: ic
-  start_url: http://www.ic.gc.ca/app/ic/cr/lstQrtrs.do?lang=eng
-  quarter_links_url_regex: !!perl/regexp (?-xism:lstCntrcts\.do\?lang=eng)
+  start_url: https://strategis.ic.gc.ca/app/scr/ic/cr/quarters.html
+  quarter_links_url_regex: !!perl/regexp (?-xism:contracts\.html)
   headers: *headers001
+  entity_row_xpath: //div[@class="icRow"]/child::*
   entity_keys:
     - uri
     - agency name
@@ -603,9 +608,10 @@ National Film Board:
   entity_keys: *entity_keys001
 
 #XXX: delivery date is rolled into contract period. in other words there's no delivery date
+#XXX: some contracts use "contract period". others use "contract period / delivery date". but we handle this in Agency.pm
 National Parole Board:
   alias: npb
-  start_url: http://www.npb-cnlc.gc.ca/rprts/contracts/index-eng.shtml
+  start_url: http://pbc-clcc.gc.ca/rprts/contracts/index-eng.shtml
   notes: XXX scraped partially, the Q4 2007-2008 link returns html source with broken links
   headers: *headers001
   entity_keys:
@@ -689,13 +695,15 @@ Public Health Agency of Canada:
 
 Public Sector Integrity Canada:
   alias: psic
-  start_url: http://www.psic-ispc.gc.ca/pd-cp/contract.php?&rpts=1&lang=eng
+  ignore: yes
+  notes: multiple contract detail tables per page
+  start_url: http://www.psic-ispc.gc.ca/about_apropos/contracts_contrats-eng.aspx
   headers: *headers001
   entity_keys: *entity_keys001
   
 Public Safety Canada:
   alias: ps
-  start_url: http://www.ps-sp.gc.ca/abt/contracts/dates-eng.aspx
+  start_url: http://www.publicsafety.gc.ca/abt/cts/qrts-eng.aspx
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
@@ -847,9 +855,10 @@ Status of Women Canada:
   entity_keys: *entity_keys001
     
 Office of the Superintendent of Financial Institutions Canada:
-  notes:
+  ignore: yes
+  notes: quarter links are using javascript
   alias: osfi
-  start_url: http://www.osfi-bsif.gc.ca/WWWapps/contracts/eng/ContractsDataSelection.asp
+  start_url: http://www.osfi-bsif.gc.ca/osfi/index_e.aspx?DetailID=719
   quarter_links_url_regex: !!perl/regexp (?-xism:contracts_reports_listing\.asp) 
   headers: *headers001
   entity_keys: *entity_keys001
@@ -878,14 +887,14 @@ Supreme Court of Canada:
 Telefilm Canada:
   notes:
   alias: telefilm
-  start_url: http://www.telefilm.gc.ca/01/103.asp?lang=en
+  start_url: http://www.telefilm.gc.ca/en/telefilm/corporate-publications/contracts-reports/103.php
   headers: *headers001
   entity_keys: *entity_keys001
 
 Transport Canada:
   alias: tc
   notes: server crashes partway thru, "Unknown web server environment. No database connection was established."
-  start_url: http://wwwapps.tc.gc.ca/Corp-Serv-Gen/2/PDC-DPC/contract/reports.asp
+  start_url: http://wwwapps2.tc.gc.ca/Corp-Serv-Gen/2/PDC-DPC/contract/reports.asp
   headers: *headers001
   entity_url_key_re: !!perl/regexp (?-xism:detail\.asp\?Contract_ID=)
   entity_keys: *entity_keys001

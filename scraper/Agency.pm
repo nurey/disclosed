@@ -373,9 +373,12 @@ sub parse_pagination_links {
 sub _parse_entity_link {
 	my ($self, $link_cell) = @_;
 	my $parser = HTML::TokeParser->new(\$link_cell);
-	my $token = $parser->get_tag('a');
-	my $attrs = $token->[1];
-	my $url = $attrs->{"href"};
+	my $url;
+	while ( my $token = $parser->get_tag('a') ) {
+	    my $attrs = $token->[1];
+    	$url = $attrs->{"href"};
+    	last if $url;
+	}
 	#$link_cell =~ s/[\n\r]//g;
 	#my ($url) = $link_cell =~ /a .+? href\s*?=\s*?["']? (.+?) ["'\>]/xi;  # some links aren't quoted at all
 	return $url;
@@ -803,7 +806,7 @@ sub _fixup_agr_url {
 	#XXX hack for Agriculture and Agri-Food Canada
 	# transform http://www4.agr.gc.ca:7778/AAFC-AAC/jsp/display-afficher.do?id=1207677963000&lang=e
 	# to
-	# http://www4.agr.gc.ca:AAFC-AAC/display-afficher.do?id=1207677963000&lang=e
+	# http://www4.agr.gc.ca/AAFC-AAC/display-afficher.do?id=1207677963000&lang=e
 	if ( $self->{alias} eq 'agr' ) {
         $logger->debug("_fixup_agr_url, link base is: " . $link->base());
 		$logger->debug("_fixup_agr_url, url  " . $link->url());

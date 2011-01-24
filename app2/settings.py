@@ -73,6 +73,7 @@ INSTALLED_APPS = (
     'appenginepatcher',
     'registration',
     'mediautils',
+    'search',
     'goat',
 )
 

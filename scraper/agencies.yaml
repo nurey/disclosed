@@ -1,5 +1,7 @@
 ---
 Environment Canada:
+  notes: Server Error on 10/11/2010
+  ignore: yes
   alias: ec
   entity_keys: &entity_keys001
   - uri
@@ -12,18 +14,14 @@ Environment Canada:
   - delivery date
   - contract value
   - comments
-  entity_table_constraints:
-    count: 0
-    depth: 2
   entity_url_key_re: !!perl/regexp (?-xism:(contractid=.+?)&)
   headers: &headers001
     - !!perl/regexp (?-xism:Date)
     - !!perl/regexp (?-xism:Vendor)
     - !!perl/regexp (?-xism:Description)
     - !!perl/regexp (?-xism:Value)
-  start_url: http://www.ec.gc.ca/contracts-contrats/default.asp?lang=En&n=168B9233-11&state=report&fiscal=
+  start_url: http://www.ec.gc.ca/contracts-contrats/index.cfm?lang=En&state=reports
 
-#XXX: contract parsing not working. html is 500 Can't connect to www4.agr.gc.ca:7778 (connect: Operation timed out)
 Agriculture and Agri-Food Canada:
   alias: agr
   start_url: http://www4.agr.gc.ca/AAFC-AAC/display-afficher.do?id=1208545435186&lang=e
@@ -60,9 +58,6 @@ Canada Border Services Agency:
     - !!perl/regexp (?-xism:Value)
     - !!perl/regexp (?-xism:Comments)
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    count: 0
-    depth: 0
     
 Canada Economic Development for Quebec Regions:
   alias: ced
@@ -81,32 +76,28 @@ Canada Economic Development for Quebec Regions:
     - contract value
     - comments
 
-Canada Firearms Centre:
-  alias: cfc
-  start_url: http://www.cfc-cafc.gc.ca/proact/contracts/reports_e.asp
-  headers: *headers001
-  entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
+# this is rolled into RCMP
+#Canada Firearms Centre:
+#  alias: cfc
+#  start_url: http://www.cfc-cafc.gc.ca/proact/contracts/reports_e.asp
+#  headers: *headers001
+#  entity_keys: *entity_keys001
+#  entity_table_constraints:
+#    depth: 0
+#    count: 0
   
 Canada Industrial Relations Board:
   alias: cirb
   start_url: http://www.cirb-ccri.gc.ca/disclosure-divulgation/contracts-contrats_eng.asp?action=reports
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
         
-Canada Public Service Agency:
-  alias: psagency
-  start_url: http://www.psagency-agencefp.gc.ca/scripts/contracts-contrats/reports-rapports-eng.asp?r=r
-  headers: *headers001
-  entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
+#XXX this agency seems to have gone AWOL
+#Canada Public Service Agency:
+#  alias: psagency
+#  start_url: http://www.psagency-agencefp.gc.ca/scripts/contracts-contrats/reports-rapports-eng.asp?r=r
+#  headers: *headers001
+#  entity_keys: *entity_keys001
     
 Canada Revenue Agency:
   alias: cra
@@ -118,9 +109,6 @@ Canada Revenue Agency:
     - !!perl/regexp (?-xism:Value)
     - !!perl/regexp (?-xism:Comments)
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
 Canada School of Public Service:
   alias: csps
@@ -132,20 +120,26 @@ Canada School of Public Service:
   entity_keys: *entity_keys001
   entity_row_xpath: //div[@class="row"]/child::*
 
-# XXX: not much contracts, deal with it later    
-# Canadian Artists and Producers Professional Relations Tribunal
-
-# XXX: not much contracts, deal with it later    
-# Canadian Centre for Occupational Health and Safety
-
-Canadian Environmental Assessment Agency:
-  alias: ceaa
-  start_url: http://www.ceaa.gc.ca/contracts-contrats/default.asp?lang=En&n=BE037596-1&state=report&fiscal=
+Canadian Artists and Producers Professional Relations Tribunal:
+  alias: capprt
+  start_url: http://www.capprt-tcrpap.gc.ca/eic/site/capprt-tcrpap.nsf/eng/tn00174.html
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 2
-    count: 0
+  
+Canadian Centre for Occupational Health and Safety:
+  ignore: yes
+  notes: multiple contract detail tables per page
+  alias: ccohs
+  contracts_links: 
+    - url: http://www.ccohs.ca/ccohs/reports/contracts_disclosure/
+  headers: *headers001
+  entity_keys: *entity_keys001
+  
+Canadian Environmental Assessment Agency:
+  alias: ceaa
+  start_url: http://www.ceaa-acee.gc.ca/contracts-contrats/index-eng.cfm?state=reports
+  headers: *headers001
+  entity_keys: *entity_keys001
   
 Canadian Food Inspection Agency:
   alias: cfia
@@ -163,30 +157,43 @@ Canadian Food Inspection Agency:
   - contract value
   - comments
 
-
-# XXX: not much contracts, deal with it later  
-# Canadian Forces Grievance Board:
-
+Canadian Forces Grievance Board:
+  alias: cfgb
+  start_url: http://www.cfgb-cgfc.gc.ca/english/PD_dc_report.html
+  headers: *headers001
+  entity_keys: *entity_keys001
+  
 #XXX what happened to the old contracts? they seem to have pulled them. Sent an email on January 5 2009.
 Canadian Grain Commission:
   alias: grains
   start_url: http://www.grainscanada.gc.ca/pd-dp/dc-dc/rp-pd-eng.htm
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
 Canadian Heritage:
   alias: ch
   start_url: http://www.pch.gc.ca/pc-ch/dp-pd/cntrct/rpt-eng.cfm
   headers: *headers001
-  entity_keys: *entity_keys001
+  entity_keys:
+    - uri
+    - agency name
+    - vendor name
+    - reference number
+    - contract date
+    - description of work
+    - contract period
+    - delivery date
+    - contract value
+    - solicitation procedure
 
 Canadian Human Rights Commission:
   alias: chrc
   start_url: http://www.chrc-ccdp.ca/disclosure_divulgation/contracts_contrats/reports_2007_rapports-en.asp
   contracts_links:
+    - text: 4th Quarter
+      url: http://www.chrc-ccdp.ca/disclosure_divulgation/quarter4_2008_trimestre4-en.asp
+    - text: 3rd Quarter
+      url: http://www.chrc-ccdp.ca/disclosure_divulgation/quarter3_2008_trimestre3-en.asp
     - text: 2nd Quarter
       url: http://www.chrc-ccdp.ca/disclosure_divulgation/quarter2_2008_trimestre2-en.asp
     - text: 1st Quarter
@@ -225,57 +232,55 @@ Canadian Human Rights Commission:
       url: http://www.chrc-ccdp.ca/disclosure_divulgation/quarter4_trimestre4/quarter4_trimestre4-en.asp
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
-# XXX: not much contracts, deal with it later  
-# Canadian Human Rights Tribunal
-
-#XXX: the listing of reports is non standard
-# Canadian Institutes of Health Research
-
-#XXX: the listing of reports is non standard
-# Canadian Intergovernmental Conference Secretariat
-
+Canadian Human Rights Tribunal:
+  notes: not much contracts 
+  alias: chrt
+  start_url: http://www.chrt-tcdp.gc.ca/contracts/reports_e.asp
+  headers: *headers001
+  entity_keys: *entity_keys001
+  
+Canadian Institutes of Health Research:
+  notes: the listing of reports is non standard
+  alias: cihr
+  start_url: http://www.cihr-irsc.gc.ca/e/25100.html
+  
+Canadian Intergovernmental Conference Secretariat:
+  notes: the listing of reports is non standard
+  alias: scics
+  start_url: http://www.scics.gc.ca/Contracts/contracts_e.html
+  
 Canadian International Development Agency:
   alias: cida
-  start_url: http://www.acdi-cida.gc.ca/CIDAWeb/Contracts10k.nsf/fWebQuarterList?OpenForm&count=5000&lang=en
-  headers:
-    - !!perl/regexp (?-xism:Vendor.*?Name)
-    - !!perl/regexp (?-xism:Description)
-    - !!perl/regexp (?-xism:Date)
-    - !!perl/regexp (?-xism:Value)
+  start_url: http://www.acdi-cida.gc.ca/acdi-cida/contrats-contracts.nsf/rprts-eng?readform
+  headers: *headers001
   # entity_link_column is the column number that contains the link to the entity details
-  entity_link_column: 0
+  entity_link_column: 1
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 2
-    count: 1
 
-# XXX: not much contracts, deal with it later  
-# Canadian International Trade Tribunal
+Canadian International Trade Tribunal:
+  notes: not much contracts
+  alias: citt
+  start_url: http://www.citt-tcce.gc.ca/proactive/contracts/reports_e.asp
+  headers: *headers001
+  entity_keys: *entity_keys001
 
 Canadian Nuclear Safety Commission:
   alias: nuclearsafety
   start_url: http://www.nuclearsafety.gc.ca/eng/proactive_disclosure/contracts/contracts_quarters.cfm
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
-# XXX: not much contracts. this only has 4 contracts and only for 2004-2005 Q1 period
-# Canadian Polar Commission:
+Canadian Polar Commission:
+  notes: not much contracts; non standard listing
+  alias: polar
+  start_url: http://www.polarcom.gc.ca/index.php?page=reports&hl=en_US
 
 Canadian Radio-television and Telecommunications Commission:
   alias: crtc
   start_url: http://support.crtc.gc.ca/expenses/contracts_e.asp?r=q
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 3
     
 #XXX there's a bug here: it won't scrape pagination links 10 and higher
 Canadian Space Agency:
@@ -286,22 +291,28 @@ Canadian Space Agency:
   pagination_link_text_re: !!perl/regexp (?-xism:^[2-9]\d*$)
   entity_keys: *entity_keys001
   entity_url_key_re: !!perl/regexp (?-xism:contracts\-d\.asp)
-  entity_attribute_class: floatLeft width27 borderLeft height15 alignRight
-  entity_value_class: floatLeft width71 borderFull height15
+## at one point they switched the contract layout to divs and then they switched back to tables
+#  entity_attribute_xpath: //div[@class="floatLeft width27 borderLeft height15 alignRight"]
+#  entity_value_xpath: //div[@class="floatLeft width71 borderFull height15"]
     
 Canadian Transportation Agency:
   alias: cta
   start_url: http://services.cta-otc.gc.ca/pd-cp/contract.php?lang=e&rpts=1
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 2
-    count: 0
   
 Citizenship and Immigration Canada:
   alias: cic
   start_url: http://www.cic.gc.ca/english/disclosure/contracts/menu-reports.asp
   contracts_links:
+    - text: July 1 – September 30, 2009
+      url: http://www.cic.gc.ca/english/disclosure/contracts/2009-Q3/index.asp
+    - text: April 1 – June 30, 2009
+      url: http://www.cic.gc.ca/english/disclosure/contracts/2009-Q2/index.asp
+    - text: January 1 – March 31, 2009
+      url: http://www.cic.gc.ca/english/disclosure/contracts/2009-Q1/index.asp
+    - text: October 1 – December 31, 2008
+      url: http://www.cic.gc.ca/english/disclosure/contracts/2008-Q4/index.asp
     - text: July 1 – September 30, 2008
       url: http://www.cic.gc.ca/english/disclosure/contracts/2008-Q3/index.asp
     - text: April 1 – June 30, 2008
@@ -340,12 +351,13 @@ Citizenship and Immigration Canada:
       url: http://www.cic.gc.ca/english/disclosure/contracts/2004-Q2/index.asp
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
-#XXX: not much contracts; deal with it later
-#Commission for Public Complaints Against the RCMP:
+Commission for Public Complaints Against the RCMP:
+  notes: not much contracts
+  alias: cpc
+  start_url: http://www.cpc-cpp.gc.ca/prd/contracts-contrats/quarter-trime/index-eng.aspx
+  headers: *headers001
+  entity_keys: *entity_keys001
   
 Office of the Commissioner for Federal Judicial Affairs:
   alias: fja
@@ -358,36 +370,34 @@ Office of the Commissioner of Official Languages:
   start_url: http://www.ocol-clo.gc.ca/html/contracts_marches_e.php
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
-# Also known as National Defense
-Communications Security Establishment:
-  alias: adm
-  start_url: http://www.admfincs.forces.gc.ca/pd/contracts/reports_e.asp
+# formerly scraped as "Communications Security Establishment"
+National Defense and the Canadian Forces:
+  alias: forces
+  start_url: http://www.admfincs.forces.gc.ca/apps/dc/intro-eng.asp
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 4
 
-#Competition Tribunal:
-#  alias: ct
-#  notes: non standard listing of contracts and very low number of contracts, do it later
-#  start_url: http://www.ct-tc.gc.ca/english/View.asp?x=252
+Competition Tribunal:
+  alias: ct
+  notes: non standard listing of contracts and very low number of contracts
+  start_url: http://www.ct-tc.gc.ca/Proactive/Contracts-eng.asp
   
-#Copyright Board Canada:
-#  alias: cb
-#  notes: non standard listing of contracts and very low number of contracts, do it later
-#  start_url: http://www.cb-cda.gc.ca/aboutus/contract/index-e.html
+Copyright Board Canada:
+  alias: cb
+  notes: non standard listing of contracts and very low number of contracts
+  start_url: http://www.cb-cda.gc.ca/about-apropos/disclosure-divulgation/contracts-contrats/index-e.html
   
-#Office of the Correctional Investigator:
-#  alias: oci
-#  notes: very low number of contracts, do it later
-#  start_url: http://www.oci-bec.gc.ca/contracts-contrats/reports_e.asp
+Office of the Correctional Investigator:
+  ignore: no
+  alias: oci
+  notes: 
+  start_url: http://www.oci-bec.gc.ca/disc-div/cont/rpt-eng.aspx
+  headers: *headers001
+  entity_keys: *entity_keys001
+  entity_attribute_xpath: //div[@class="cell bgGrey alignRight"]/strong
+  entity_value_xpath: //div[@class="col width65"]/div
   
-#NOTE some contracts are at different table coords so entity_table_constraints are computed
 Correctional Service of Canada:
   alias: csc
   notes:
@@ -409,9 +419,6 @@ Elections Canada:
   start_url: http://www.elections.ca/contracts/default.asp?&textonly=false&lang=e&action=report
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 0
     
 Department of Finance Canada:
   alias: fin
@@ -422,7 +429,7 @@ Department of Finance Canada:
     
 Financial Consumer Agency of Canada:
   alias: fcac
-  start_url: http://www.fcac-acfc.gc.ca/eng/Disclosure/Contracts-eng.asp?view=v1
+  start_url: http://www.fcac-acfc.gc.ca/eng/Disclosure/Contracts-eng.asp?View=V1
   headers: *headers001
   entity_keys: *entity_keys001
     
@@ -431,11 +438,10 @@ Financial Transactions and Reports Analysis Centre of Canada:
   start_url: http://www.fintrac-canafe.gc.ca/publications/PD/cd/rpt-eng.asp
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
 #XXX: contracts have extra attributes like Regional Office and Contact Phone Number
+#XXX: some contracts have "original contract value", others "contract value". eg:
+  # http://www.dfo-mpo.gc.ca/PD-CP/2007Q2RA_D_E.asp?r=f2401-060004 vs. http://www.dfo-mpo.gc.ca/PD-CP/2010Q1RA_D_E.asp?r=f6879-091062
 Fisheries and Oceans Canada:
   alias: dfo
   start_url: http://www.dfo-mpo.gc.ca/PD-CP/reports_e.asp
@@ -444,28 +450,26 @@ Fisheries and Oceans Canada:
     
 Foreign Affairs and International Trade Canada:
   alias: fac
-  start_url: http://w01.fac-aec.gc.ca/dc/main_fa.aspx?l=e&p=2
+  start_url: http://w01.fac-aec.gc.ca/dc/index_fa-ae.aspx?lang=eng&p=2
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
-#XXX not much contracts
-#Hazardous Materials Information Review Commission
-
-
-# list of contracts have pagination, but there's a printable version which lists all on one page
+Hazardous Materials Information Review Commission:
+  alias: hmirc
+  start_url: http://www.hmirc-ccrmd.gc.ca/disclosure-divulgation/10k-10mil/reports-rapports-eng.shtml
+  headers: *headers001
+  entity_keys: *entity_keys001
+  
+# list of contracts have pagination, but we hack the url for each list of contracts
 Health Canada:
   alias: hc
+  ignore: no
   notes:
-  start_url: http://www.contracts-contrats.hc-sc.gc.ca/cfob/mssid/contractdisc.nsf/webreport?ReadForm&Start=1&Count=30&ExpandAll&L=E&
-  printable_version: 1
+  start_url: http://www.contracts-contrats.hc-sc.gc.ca/cfob/mssid/contractdisc.nsf/webGetbyperiod?OpenView&Count=1000&ExpandAll&lang=eng&
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 4
+  entity_attribute_xpath: //h3
+  entity_value_xpath: //div[@class="center"]/div/p
     
 Human Resources and Social Development Canada:
   alias: hrsdc
@@ -473,8 +477,11 @@ Human Resources and Social Development Canada:
   headers: *headers001
   entity_keys: *entity_keys001
   
-#XXX: non standard listing of contracts
-#Immigration and Refugee Board of Canada:
+Immigration and Refugee Board of Canada:
+  notes: non standard listing of contracts
+  ignore: yes
+  alias: irb
+  start_url: http://www.irb-cisr.gc.ca/eng/disdiv/contracts/Pages/index.aspx
   
 Indian and Northern Affairs Canada:
   alias: inac
@@ -483,22 +490,23 @@ Indian and Northern Affairs Canada:
   pagination_link_text_re: !!perl/regexp (?-xism:^[2-9]\d*$)
   headers: *headers001
   entity_keys: *entity_keys001
-  
-Indian Residential Schools Resolution Canada:
-  alias: rqpi
-  start_url: http://www.ainc-inac.gc.ca/prodis/cntrcts/rprts-eng.asp
-  headers: *headers001
-  entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
+
+# merged into INAC  
+# Indian Residential Schools Resolution Canada:
+#   alias: rqpi
+#   start_url: http://www.ainc-inac.gc.ca/prodis/cntrcts/rprts-eng.asp
+#   headers: *headers001
+#   entity_keys: *entity_keys001
 
 #XXX: delivery date is rolled into contract period. in other words there's no delivery date
 Industry Canada:
+  notes: contract value parser not working here
+  ignore: yes
   alias: ic
-  start_url: http://www.ic.gc.ca/app/ic/cr/lstQrtrs.do?lang=eng
-  quarter_links_url_regex: !!perl/regexp (?-xism:lstCntrcts\.do\?lang=eng)
+  start_url: https://strategis.ic.gc.ca/app/scr/ic/cr/quarters.html
+  quarter_links_url_regex: !!perl/regexp (?-xism:contracts\.html)
   headers: *headers001
+  entity_row_xpath: //div[@class="icRow"]/child::*
   entity_keys:
     - uri
     - agency name
@@ -510,53 +518,32 @@ Industry Canada:
     - delivery date
     - contract value
     - comments
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
-#Office of the Information Commissioner:
-#  alias: infocom
-#  start_url: http://www.infocom.gc.ca/expenses/contracts/2006_2007-e.asp
-#  notes: non standard listing of contracts
+Office of the Information Commissioner:
+  ignore: yes
+  notes: non standard listing of contracts
+  alias: infocom
+  start_url: http://www.infocom.gc.ca/expenses/contracts/2006_2007-e.asp
   
 Infrastructure Canada:
   alias: infrastructure
-  start_url: http://www.infrastructure.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=r
+  ignore: no
   notes:
+  start_url: http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?t1=r
   headers: *headers001
   entity_keys: *entity_keys001
-  contracts_links:
-    - { text: 2008 Q2, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2008&q=2" }
-    - { text: 2008 Q1, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2008&q=1" }
-    - { text: 2007 Q4, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2008&q=4" }
-    - { text: 2007 Q3, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2007&q=3" }
-    - { text: 2007 Q2, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2007&q=2" }
-    - { text: 2007 Q1, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2007&q=1" }
-    - { text: 2006 Q4, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2007&q=4" }
-    - { text: 2006 Q3, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2006&q=3" }
-    - { text: 2006 Q2, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2006&q=2" }
-    - { text: 2006 Q1, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2006&q=1" }
-    - { text: 2005 Q4, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2006&q=4" }
-    - { text: 2005 Q3, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2005&q=3" }
-    - { text: 2005 Q2, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2005&q=2" }
-    - { text: 2005 Q1, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2005&q=1" }
-    - { text: 2004 Q4, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2005&q=4" }
-    - { text: 2004 Q3, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2004&q=3" }
-    - { text: 2004 Q2, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2004&q=2" }
-    - { text: 2004 Q1, url: "http://www.infc.gc.ca/pd-dp/pdc-dpm/reports-rapports-eng.php?type=q&p=2004&q=1" }
-    
+  quarter_links_url_regex: !!perl/regexp (?-xism:reports-rapports-eng.php)
+  entity_attribute_xpath: //div[@class="center"]/p/strong
+  entity_value_xpath: //div[@class="center"]/p[strong]/text()
+
 Department of Justice Canada:
   alias: justice
   start_url: http://canada.justice.gc.ca/eng/dept-min/pd-dp/contra/rep-rap.asp
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 0
 
 #XXX 1: delivery date is rolled into contract period. in other words there's no delivery date.
-#NOTE some (older) contracts are at different table coords so entity_table_constraints are computed
 Libraries and Archives Canada:
   alias: lac
   start_url: http://www.lac-bac.gc.ca/disclosure/contracts/012030-200-e.html
@@ -575,23 +562,24 @@ Libraries and Archives Canada:
     - comments
   entity_row_xpath: //div[@class="col"]/child::*
     
-#Military Policy Complaints Commission:
-#  alias: mpcc
-#  start_url: http://www.mpcc-cppm.gc.ca/600/6200/index_e.aspx
-#  notes: non standard contract details (no table) and not much contracts
-#  headers: *headers001
-#  entity_keys: *entity_keys001
+Military Policy Complaints Commission:
+  ignore: yes
+  alias: mpcc
+  start_url: http://www.mpcc-cppm.gc.ca/600/6200/index-eng.aspx
+  notes: non standard contract details (no table) and not much contracts
+  headers: *headers001
        
-#XXX: not much contracts, deal with it later
-#NAFTA Secretariat
-
-#See Communications Security Establishment
-#National Defense:
+NAFTA Secretariat:
+  start_url: http://www.nafta-alena.gc.ca/en/view.aspx?conID=798
+  alias: nafta
+  headers: *headers001
+  entity_keys: *entity_keys001
   
 National Energy Board:
   alias: neb
   start_url: http://www.neb-one.gc.ca/cntrctsrprtng/rprts.aspx?lang=e
-  notes: 
+  ignore: yes
+  notes: contract value is not getting scraped
   headers: *headers001
   entity_keys:
     - uri
@@ -605,21 +593,25 @@ National Energy Board:
     - value
     - comments
  
-#XXX: not much contracts, deal with it later   
-#National Farm Products Council:
+National Farm Products Council:
+  alias: nfpc
+  start_url: http://nfpc-cnpa.gc.ca/index.php?option=com_content&task=view&id=44&lang=english
+  ignore: yes
+  notes: not much contracts. non standard listing of contracts
   
 National Film Board:
   alias: nfb
-  start_url: http://www3.nfb.ca/about/publications/divulgation-proactive.php
-  #quarter_links_url_regex: !!perl/regexp (?-xism:disclosure/trimestre.php)
+  start_url: http://www.onf-nfb.gc.ca/eng/about-us/publications/#n-proactive-disclosure
+  quarter_links_url_regex: !!perl/regexp (?-xism:disclosure-of-contracts.php)
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
 
 #XXX: delivery date is rolled into contract period. in other words there's no delivery date
+#XXX: some contracts use "contract period". others use "contract period / delivery date". but we handle this in Agency.pm
 National Parole Board:
   alias: npb
-  start_url: http://www.npb-cnlc.gc.ca/rprts/contracts/index-eng.shtml
+  start_url: http://pbc-clcc.gc.ca/rprts/contracts/index-eng.shtml
   notes: XXX scraped partially, the Q4 2007-2008 link returns html source with broken links
   headers: *headers001
   entity_keys:
@@ -636,16 +628,15 @@ National Parole Board:
     
 National Research Council Canada:
   alias: nrc
-  start_url: http://www.nrc-cnrc.gc.ca/disclosure/contracts/contract.php?action=index&long_index=1&lang=eng
+  start_url: http://www.nrc-cnrc.gc.ca/eng/disclosure/contracts/index.php?action=index&long_index=1
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
+  quarter_links_url_regex: !!perl/regexp (?-xism:index\.php\?action=quarterly)
 
-#XXX: broken html
 National Round Table on the Environment and the Economy:
   alias: nrtee
   start_url: http://www.nrtee-trnee.com/eng/about-us/proactive-disclosure/contracts/contract-reporting-periods.php
-  notes: broken html
   headers: *headers001
   entity_keys: *entity_keys001
   
@@ -655,14 +646,14 @@ Natural Resources Canada:
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
   
 Natural Sciences and Engineering Research Council of Canada:
   alias: nserc
   #start_url: http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/contracts-contrats_eng.asp
   contracts_links:
+    - { text: 2009 Q1, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2009&PID=2" }
+    - { text: 2008 Q4, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2009&PID=1" }
+    - { text: 2008 Q3, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=4" }
     - { text: 2008 Q2, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=3" }
     - { text: 2008 Q1, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=2" }
     - { text: 2007 Q4, url: "http://www.nserc-crsng.gc.ca/Disclosure-Divulgation/ContractList-ListeContrat_eng.asp?Year=2008&PID=1" }
@@ -682,17 +673,14 @@ Patented Medicine Prices Review Board:
     
 Privacy Commissioner of Canada:
   alias: privcom
-  start_url: http://www.privcom.gc.ca/pd-dp/c-c/index_01_e.asp
+  start_url: http://www.priv.gc.ca/pd-dp/c-c/index_01_e.cfm
   notes: 
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 1
   
 Privy Council Office:
   alias: pco
-  start_url: http://www.pco-bcp.gc.ca/dc/Contracts_FYQuarter_Listings.asp?Language=E
+  start_url: http://www.pco-bcp.gc.ca/dc/Contracts_FYQuarter_Listings.asp?lang=eng
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
@@ -702,30 +690,23 @@ Public Health Agency of Canada:
   alias: phac
   start_url: http://www.contracts-contrats.phac-aspc.gc.ca/phac/pd/pd_contracts.nsf/webreport?ReadForm&Start=1&Count=30&ExpandAll&L=E&
   printable_version: 1
-  headers:
-    - !!perl/regexp (?-xism:Date)
-    - !!perl/regexp (?-xism:Vendor)
-    - !!perl/regexp (?-xism:Description)
-    - !!perl/regexp (?-xism:Value)
+  headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 6
 
-#Public Sector Integrity Canada:
-#  alias: psic
-#  start_url: http://www.psic-ispc.gc.ca/pd-cp/contract.php?&rpts=1&lang=eng
-#  notes: not much contracts
+Public Sector Integrity Canada:
+  alias: psic
+  ignore: yes
+  notes: multiple contract detail tables per page
+  start_url: http://www.psic-ispc.gc.ca/about_apropos/contracts_contrats-eng.aspx
+  headers: *headers001
+  entity_keys: *entity_keys001
   
 Public Safety Canada:
   alias: ps
-  start_url: http://www.ps-sp.gc.ca/abt/contracts/dates-eng.aspx
+  start_url: http://www.publicsafety.gc.ca/abt/cts/qrts-eng.aspx
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Public Service Commission:
   alias: psc
@@ -733,9 +714,6 @@ Public Service Commission:
   notes:
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
 Public Service Labour Relations Board:
   alias: pslrb
@@ -754,16 +732,13 @@ Public Service Labour Relations Board:
     - delivery date
     - contract value
     - comments
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
-#XXX entity_link_column is 1 for some years, 2 for more recent years.
 Public Service Staffing Tribunal:
   alias: psst
   start_url: http://www.psst-tdfp.gc.ca/article.asp?id=2403
   notes:
   contracts_links:
+    - { text: 2009, url: "http://www.psst-tdfp.gc.ca/article.asp?id=4056" }
     - { text: 2008, url: "http://www.psst-tdfp.gc.ca/article.asp?id=3334" }
     - { text: 2007, url: "http://www.psst-tdfp.gc.ca/article.asp?id=3162" }
     - { text: 2006, url: "http://www.psst-tdfp.gc.ca/article.asp?id=2783" }
@@ -780,8 +755,8 @@ Public Service Staffing Tribunal:
     - delivery date
     - contract value
     - comments
+  entity_url_key_re: !!perl/regexp (?-xism:article\.asp\?id=)
 
-#XXX: problem with the list of contracts. entity_link_column is outside the parsed columns
 Public Works and Government Services Canada:
   alias: pwgsc
   start_url: http://www.tpsgc-pwgsc.gc.ca/cgi-bin/proactive/cl.pl?lang=eng&SCR=Q&Sort=0
@@ -789,18 +764,18 @@ Public Works and Government Services Canada:
   #entity_url_key_re: !!perl/regexp (?-xism:(Language=E;SCR=D;Sort=0;PF=.+?;LN=)) 
   entity_keys: *entity_keys001
     
-#RCMP External Review Committee:
-#  alias: erc
-#  start_url: http://www.erc-cee.gc.ca/english/pd/contracts/reports_e.html
-#  notes: not much contracts
+RCMP External Review Committee:
+  alias: erc
+  start_url: http://www.erc-cee.gc.ca/proactive/contracts/date-eng.aspx
+  headers: *headers001
+  entity_keys: *entity_keys001
   
-#Commissioner of Lobbying of Canada:
-#  alias: ocl 
-#  start_url: http://www.ocl-cal.gc.ca/epic/site/lobbyist-lobbyiste1.nsf/en/nx00128e.html
-#  notes: not much contracts
+Commissioner of Lobbying of Canada:
+  alias: ocl 
+  start_url: http://www.ocl-cal.gc.ca/epic/site/lobbyist-lobbyiste1.nsf/en/nx00128e.html
+  ignore: yes
+  notes: not much contracts
 
-#XXX: uses javascript to hold the contract data. 
-# use a javascript engine (eg. WWW-Mechanize-Plugin-JavaScript) or parse the contractHashXX.js from each contract page
 RCMP:
   alias: rcmp
   start_url: http://www.rcmp-grc.gc.ca/pd-dp/contra/report-rapport-eng.htm
@@ -809,17 +784,15 @@ RCMP:
 
 Governor General:
   alias: gg
-  start_url: http://www.gg.ca/osgg-bsgg/pd-dp/dc/osgg-bsgg-dc-li.asp?lang=e
+  start_url: http://archive.gg.ca/osgg-bsgg/pd-dp/dc/osgg-bsgg-dc-li.asp?lang=e
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 0
   
-#Security Intelligence Review Committee:
-#  alias: sirc
-#  start_url: http://www.sirc-csars.gc.ca/prddpr/ctrcts/ctrcts-eng.html
-#  notes: not much contracts
+Security Intelligence Review Committee:
+  alias: sirc
+  start_url: http://www.sirc-csars.gc.ca/prddpr/ctrcts/ctrcts-eng.html
+  ignore: yes
+  notes: not much contracts and complicated to scrape
   
 Service Canada:
   alias: service
@@ -827,34 +800,36 @@ Service Canada:
   headers: *headers001
   entity_keys: *entity_keys001
     
-#XXX non standard listing of contract entities
-#Social Sciences and Humanities Research Council of Canada:
-#  alias: sshrc
-#  contracts_links:
-#    - { text: July 1, 2008 - September 30, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2008/second_quarter_e.asp" }
-#    - { text: April 1, 2008 - June 30, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2008/first_quarter_e.asp" }
-#    - { text: January 1, 2008 - March 31, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/fourth_quarter_e.asp" }
-#    - { text: October 1, 2007 - December 31, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/third_quarter_e.asp" }
-#    - { text: July 1, 2007 - September 30, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/second_quarter_e.asp" }
-#    - { text: April 1, 2007 - June 30, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/first_quarter_e.asp" }
-#    - { text: January 1, 2007 - March 31, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/forth_quarter_e.asp" }
-#    - { text: October 1, 2006 - December 31, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/third_quarter_e.asp" }
-#    - { text: July 1, 2006 - September 30, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/second_quarter_e.asp" }
-#    - { text: April 1, 2006 - June 30, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/first_quarter_e.asp" }
-#    - { text: January 1, 2006 - March 31, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/forth_quarter_e.asp" }
-#    - { text: October 1, 2005 - December 31, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/third_quarter_e.asp" }
-#    - { text: July 1, 2005 - September 30, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/second_quarter_e.asp" }
-#    - { text: April 1, 2005 - June 30, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/first_quarter_e.asp" }
-#    - { text: January 1, 2005 - March 31, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/forth_quarter_e.asp" }
-#    - { text: October 1 2004 - December 31, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/third_quarter_e.asp" }
-#    - { text: July 1, 2004 - September 30, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/second_quarter_e.asp" }
-#    - { text: April 1, 2004- June 30, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/first_quarter_e.asp" }
-#  headers: *headers001
-#  entity_keys: *entity_keys001
+
+Social Sciences and Humanities Research Council of Canada:
+  alias: sshrc
+  ignore: yes
+  note: non standard listing of contract entities
+  contracts_links:
+   - { text: July 1, 2008 - September 30, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2008/second_quarter_e.asp" }
+   - { text: April 1, 2008 - June 30, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2008/first_quarter_e.asp" }
+   - { text: January 1, 2008 - March 31, 2008, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/fourth_quarter_e.asp" }
+   - { text: October 1, 2007 - December 31, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/third_quarter_e.asp" }
+   - { text: July 1, 2007 - September 30, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/second_quarter_e.asp" }
+   - { text: April 1, 2007 - June 30, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2007/first_quarter_e.asp" }
+   - { text: January 1, 2007 - March 31, 2007, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/forth_quarter_e.asp" }
+   - { text: October 1, 2006 - December 31, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/third_quarter_e.asp" }
+   - { text: July 1, 2006 - September 30, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/second_quarter_e.asp" }
+   - { text: April 1, 2006 - June 30, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2006/first_quarter_e.asp" }
+   - { text: January 1, 2006 - March 31, 2006, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/forth_quarter_e.asp" }
+   - { text: October 1, 2005 - December 31, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/third_quarter_e.asp" }
+   - { text: July 1, 2005 - September 30, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/second_quarter_e.asp" }
+   - { text: April 1, 2005 - June 30, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2005/first_quarter_e.asp" }
+   - { text: January 1, 2005 - March 31, 2005, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/forth_quarter_e.asp" }
+   - { text: October 1 2004 - December 31, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/third_quarter_e.asp" }
+   - { text: July 1, 2004 - September 30, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/second_quarter_e.asp" }
+   - { text: April 1, 2004- June 30, 2004, url: "http://www.sshrc.ca/web/proactive_disclosure/contracts/2004/first_quarter_e.asp" }
+  headers: *headers001
+  entity_keys: *entity_keys001
    
 Statistics Canada:
   alias: stat
-  start_url: http://www.statcan.ca/english/about/contract/quarter.htm
+  start_url: http://www.statcan.gc.ca/about-apercu/contract-contrat/report-rapport-eng.htm
   headers: *headers001
   headers_fallback:
     - !!perl/regexp (?-xism:Date)
@@ -872,12 +847,7 @@ Statistics Canada:
     - delivery date
     - contract value
     - comments
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
-#XXX all scraped OK, except one contract was 404: http://www.swc-cfc.gc.ca/about/disclosures/contracts/2006-2007/contract_149_e.html
-# from http://www.tc.gc.ca/finance/contract/Contract_list.asp?Quarter=1&year=2006
 Status of Women Canada:
   alias: swc
   start_url: http://www.swc-cfc.gc.ca/account-resp/pd-dp/dc/rep-rap-eng.html
@@ -885,15 +855,13 @@ Status of Women Canada:
   entity_keys: *entity_keys001
     
 Office of the Superintendent of Financial Institutions Canada:
-  notes:
+  ignore: yes
+  notes: quarter links are using javascript
   alias: osfi
-  start_url: http://www.osfi-bsif.gc.ca/WWWapps/contracts/eng/ContractsDataSelection.asp
+  start_url: http://www.osfi-bsif.gc.ca/osfi/index_e.aspx?DetailID=719
   quarter_links_url_regex: !!perl/regexp (?-xism:contracts_reports_listing\.asp) 
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 1
-    count: 0
     
 Supreme Court of Canada:
   alias: scc
@@ -915,53 +883,73 @@ Supreme Court of Canada:
     - delivery date
     - contract value
     - comments
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Telefilm Canada:
   notes:
   alias: telefilm
-  start_url: http://www.telefilm.gc.ca/01/103.asp?lang=en
+  start_url: http://www.telefilm.gc.ca/en/telefilm/corporate-publications/contracts-reports/103.php
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 4
-    count: 0
 
 Transport Canada:
   alias: tc
   notes: server crashes partway thru, "Unknown web server environment. No database connection was established."
-  start_url: http://wwwapps.tc.gc.ca/Corp-Serv-Gen/2/PDC-DPC/contract/reports.asp
+  start_url: http://wwwapps2.tc.gc.ca/Corp-Serv-Gen/2/PDC-DPC/contract/reports.asp
   headers: *headers001
   entity_url_key_re: !!perl/regexp (?-xism:detail\.asp\?Contract_ID=)
   entity_keys: *entity_keys001
     
-#Transportation Appeal Tribunal of Canada:
-#  alias: tatc
-#  notes: XXX not much contracts
+Transportation Appeal Tribunal of Canada:
+  alias: tatc
+  start_url: http://www.tatc.gc.ca/pd-cp/contract.php?&rpts=1&lang=eng
+  headers: *headers001
+  entity_keys: *entity_keys001
   
 Transportation Safety Board of Canada:
   alias: tsb
   contracts_links:
-    - { text: July 1 - September 30, 2008, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q2/index.asp" }
-    - { text: April 1 - June 30, 2008, 			url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q1/index.asp" }
-    - { text: January 1 - March 31, 2008, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q4/index.asp" }
-    - { text: October 1 - December 31, 2007, 	url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q3/index.asp" }
-    - { text: July 1 - September 30, 2007, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q2/index.asp" }
-    - { text: April 1 - June 30, 2007, 			url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q1/index.asp" }
-    - { text: January 1 - March 31, 2007, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q4/index.asp" }
-    - { text: October 1 - December 31, 2006, 	url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q3/index.asp" }
-    - { text: July 1 - September 30, 2006, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q2/index.asp" }
-    - { text: April 1 - June 30, 2006, 			url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q1/index.asp" }
-    - { text: January 1 - March 31, 2006, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q4/index.asp" }
-    - { text: October 1 - December 31, 2005, 	url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q3/index.asp" }
-    - { text: July 1 - September 30, 2005, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q2/index.asp" }
-    - { text: April 1 - June 30, 2005, 			url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q1/index.asp" }
-    - { text: January 1 - March 31, 2005, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q4/index.asp" }
-    - { text: October 1 - December 31, 2004, 	url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q3/index.asp" }
-    - { text: July 1 - September 30, 2004, 		url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q2/index.asp" }
-    - { text: April 1 - June 30, 2004, 			url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q1/index.asp" }
+    - text: April 1 - June 30, 2009
+      url: http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2009-2010/Q1/index.asp
+    - text: January 1 - March 31, 2009
+      url: http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q4/index.asp
+    - text: October 1 - December 31, 2008
+      url: http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q3/index.asp
+    - text: July 1 - September 30, 2008
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q2/index.asp" 
+    - text: April 1 - June 30, 2008                                                                    
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2008-2009/Q1/index.asp" 
+    - text: January 1 - March 31, 2008                                                                 
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q4/index.asp" 
+    - text: October 1 - December 31, 2007                                                              
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q3/index.asp" 
+    - text: July 1 - September 30, 2007                                                                
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q2/index.asp" 
+    - text: April 1 - June 30, 2007                                                                    
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2007-2008/Q1/index.asp" 
+    - text: January 1 - March 31, 2007                                                                 
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q4/index.asp" 
+    - text: October 1 - December 31, 2006                                                              
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q3/index.asp" 
+    - text: July 1 - September 30, 2006                                                                
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q2/index.asp" 
+    - text: April 1 - June 30, 2006                                                                    
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2006-2007/Q1/index.asp" 
+    - text: January 1 - March 31, 2006                                                                 
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q4/index.asp" 
+    - text: October 1 - December 31, 2005                                                              
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q3/index.asp" 
+    - text: July 1 - September 30, 2005                                                                
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q2/index.asp" 
+    - text: April 1 - June 30, 2005                                                                    
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2005-2006/Q1/index.asp" 
+    - text: January 1 - March 31, 2005                                                                 
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q4/index.asp" 
+    - text: October 1 - December 31, 2004                                                              
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q3/index.asp" 
+    - text: July 1 - September 30, 2004                                                                
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q2/index.asp" 
+    - text: April 1 - June 30, 2004                                                                    
+      url: "http://www.tsb.gc.ca/eng/divulgation-disclosure/contrats-contracts/2004-2005/Q1/index.asp" 
   headers: *headers001
   entity_keys:
     - uri
@@ -980,46 +968,44 @@ Treasury Board of Canada Secretariat:
   start_url: http://www.tbs-sct.gc.ca/scripts/contracts-contrats/reports-rapports-eng.asp
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Veterans Affairs Canada:
   alias: vac
   start_url: http://www.vac-acc.gc.ca/general/sub.cfm?source=department/dco10k/list_quarter&profile=vac
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Office of the Veterans Ombudsman:
   alias: vacombudsman
   start_url: http://www.vac-acc.gc.ca/general/sub.cfm?source=department/dco10k/list_quarter&profile=ombudsman
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
 
 Veterans Review and Appeal Board Canada:
   alias: vrab
-  start_url: http://www.vrab-tacra.gc.ca/Contracts&Reclass/Contracts-Reports.htm
+  start_url: http://www.vrab-tacra.gc.ca/Proactive-Divulgation/Contract-quarters-contrat-trimestres-eng.cfm
   headers: *headers001
   entity_keys: *entity_keys001
-  entity_table_constraints:
-    depth: 0
-    count: 0
     
 Western Economic Diversification Canada:
   alias: wd
   start_url: http://www.wd.gc.ca/eng/7705.asp
   headers: *headers001
-  entity_keys: *entity_keys001
+  entity_keys:
+    - uri
+    - agency name
+    - vendor name
+    - reference number
+    - contract date
+    - description of work
+    - contract period / delivery date
+    - delivery date
+    - contract value
+    - comments
     
 Parks Canada:
   alias: pc
-  start_url: http://pc.gc.ca/apps/pdc/index_E.asp?oqYEAR=&oqQUARTER=
+  start_url: http://www.pc.gc.ca/apps/pdc/index_E.asp?oqYEAR=&oqQUARTER=
   headers: *headers001
   entity_keys: *entity_keys001
   entity_url_key_re: !!perl/regexp (?-xism:(oqCONTRACT_ID=.+?)")

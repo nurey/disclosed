@@ -20,3 +20,13 @@ The CSV column names are:
   - contract value
   - comments
 
+--
+LOADING INTO MYSQL
+==================
+mysqladmin -uroot create disclosed
+mysql -uroot disclosed < contracts.sql
+rm -f contracts.csv
+cat *.csv >> contracts.csv
+LOAD DATA LOCAL INFILE 'contracts.csv' IGNORE INTO TABLE contracts FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '"' (uri, agency_name, vendor_name, reference_number, contract_date, description, contract_period, delivery_date, contract_value, comments)
+
+

@@ -1,5 +1,18 @@
 Before you can run the scraping scripts, you need to set env var GOAT_HOME to point to where you checked out goat.
 
+
+Using Carton:
+
+To install carton on either Mac OS X or Linux:
+> sudo cpan install carton
+> carton install
+
+Running the scraper:
+> carton exec perl scrape_agency.pl oag # this would scrape 'Office of the Auditor General of Canada'
+
+
+Alternatively you could try installing the dependencies using ubuntu packages. NOT RECOMMENDED. OBSOLETE.
+
 Prerequisites for Ubuntu Intrepid Ibex:
 	sudo apt-get install libhtml-tableextract-perl \
 	 libwww-mechanize-perl \
